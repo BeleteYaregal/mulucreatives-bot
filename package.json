@@ -1,0 +1,25 @@
+{
+  "name": "mulucreatives-bot",
+  "version": "1.0.0",
+  "description": "MuluCreatives — Professional Design Studio Telegram Bot",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "dev": "node --watch src/bot.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "design",
+    "business-card",
+    "logo"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@grammyjs/conversations": "^2.1.1",
+    "canvas": "^3.2.3",
+    "dotenv": "^17.4.2",
+    "grammy": "^1.45.1",
+    "sharp": "^0.35.3"
+  }
+}

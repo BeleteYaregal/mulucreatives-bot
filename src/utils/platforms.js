@@ -1,0 +1,15 @@
+module.exports = {
+  instagram_post:   { w: 1080, h: 1080, label: 'Instagram Post' },
+  instagram_story:  { w: 1080, h: 1920, label: 'Instagram Story' },
+  facebook_post:    { w: 1200, h: 630, label: 'Facebook Post' },
+  facebook_cover:   { w: 1640, h: 624, label: 'Facebook Cover' },
+  twitter_post:     { w: 1600, h: 900, label: 'Twitter Post' },
+  twitter_header:   { w: 1500, h: 500, label: 'Twitter Header' },
+  linkedin_post:    { w: 1200, h: 627, label: 'LinkedIn Post' },
+  linkedin_cover:   { w: 1584, h: 396, label: 'LinkedIn Cover' },
+  youtube_thumb:    { w: 1280, h: 720, label: 'YouTube Thumbnail' },
+  business_card:    { w: 1050, h: 600, label: 'Business Card' },
+  logo_square:      { w: 800, h: 800, label: 'Logo' },
+  logo_favicon:     { w: 128, h: 128, label: 'Favicon' },
+  a4_portrait:      { w: 2480, h: 3508, label: 'A4 Portrait (300 DPI)' },
+};
