@@ -117,7 +117,7 @@ module.exports = {
 
       // Company Name
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold 36px ${fontSans}`;
+      ctx.font = `bold 32px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText((company || 'COMPANY NAME').toUpperCase(), centerX, centerY + 30);
@@ -125,7 +125,7 @@ module.exports = {
       // Tagline
       if (tagline || data.tagline) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-        ctx.font = `18px ${fontSans}`;
+        ctx.font = `16px ${fontSans}`;
         ctx.fillText((tagline || data.tagline || 'SLOGAN HERE').toUpperCase(), centerX, centerY + 78);
       }
 
@@ -145,7 +145,7 @@ module.exports = {
 
       // Website URL at bottom
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = `20px ${fontSans}`;
+      ctx.font = `18px ${fontSans}`;
       ctx.fillText(website || 'www.yourwebsite.com', centerX, height - 80);
 
     } else {
@@ -163,12 +163,12 @@ module.exports = {
       ctx.fillStyle = themeBg;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      const nameSize = fitText(ctx, name || 'YOUR NAME', 500, 52, fontSans);
+      const nameSize = fitText(ctx, name || 'YOUR NAME', 500, 38, fontSans);
       ctx.font = `bold ${nameSize}px ${fontSans}`;
       ctx.fillText(name || 'YOUR NAME', startX, 150);
 
       ctx.fillStyle = textMuted;
-      ctx.font = `20px ${fontSans}`;
+      ctx.font = `18px ${fontSans}`;
       ctx.fillText(title || 'SLOGAN HERE', startX, 212);
 
       // Horizontal Colored Accent Line beneath Header
@@ -193,7 +193,7 @@ module.exports = {
         iconDrawFn(ctx, startX + 20, contactY + 12, iconSize * 0.55, '#FFFFFF');
 
         ctx.fillStyle = textDark;
-        ctx.font = `19px ${fontSans}`;
+        ctx.font = `17px ${fontSans}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(value, startX + 55, contactY + 12);
@@ -234,7 +234,7 @@ module.exports = {
       }
 
       ctx.fillStyle = themeBg;
-      ctx.font = `bold 24px ${fontSans}`;
+      ctx.font = `bold 22px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.fillText((company || 'COMPANY NAME').toUpperCase(), miniLogoX, miniLogoY + 55);
       
@@ -249,7 +249,7 @@ module.exports = {
 
       // Centered URL in white inside bottom strip
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `18px ${fontSans}`;
+      ctx.font = `17px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`•   ${website || 'www.yourwebsite.com'}   •`, width / 2, height - footerH / 2);

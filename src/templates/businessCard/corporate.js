@@ -63,7 +63,7 @@ module.exports = {
 
       // Company Name
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold 38px ${fontSans}`;
+      ctx.font = `bold 32px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText((company || 'Larana, Inc.').toUpperCase(), centerX, centerY + 30);
@@ -71,7 +71,7 @@ module.exports = {
       // Tagline
       if (tagline || data.tagline) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-        ctx.font = `18px ${fontSans}`;
+        ctx.font = `16px ${fontSans}`;
         ctx.fillText((tagline || data.tagline || 'SLOGAN HERE').toUpperCase(), centerX, centerY + 78);
       }
 
@@ -94,7 +94,7 @@ module.exports = {
       ctx.fillRect(0, serviceBarY, width, serviceBarH);
 
       ctx.fillStyle = themeBg;
-      ctx.font = `bold 16px ${fontSans}`;
+      ctx.font = `bold 15px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
@@ -104,7 +104,7 @@ module.exports = {
 
       // Website URL at the very bottom
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = `18px ${fontSans}`;
+      ctx.font = `17px ${fontSans}`;
       ctx.fillText(website || 'www.yourwebsite.com', width / 2, height - 40);
 
     } else {
@@ -127,12 +127,12 @@ module.exports = {
       ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      const nameSize = fitText(ctx, name || 'YOUR NAME', 400, 48, fontSans);
+      const nameSize = fitText(ctx, name || 'YOUR NAME', 400, 38, fontSans);
       ctx.font = `bold ${nameSize}px ${fontSans}`;
       ctx.fillText(name || 'YOUR NAME', startX, 120);
 
       ctx.fillStyle = themeAccent;
-      ctx.font = `20px ${fontSans}`;
+      ctx.font = `18px ${fontSans}`;
       ctx.fillText(title || 'SLOGAN HERE', startX, 175);
 
       // Divider line in left panel
@@ -158,7 +158,7 @@ module.exports = {
 
         // Draw value text in white
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = `19px ${fontSans}`;
+        ctx.font = `17px ${fontSans}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(value, startX + 60, contactY + 22);
@@ -199,12 +199,12 @@ module.exports = {
       }
 
       ctx.fillStyle = themeBg;
-      ctx.font = `bold 26px ${fontSans}`;
+      ctx.font = `bold 22px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.fillText((company || 'Larana, Inc.').toUpperCase(), rightCenterX, miniLogoY + 65);
       
       ctx.fillStyle = textMuted;
-      ctx.font = `14px ${fontSans}`;
+      ctx.font = `13px ${fontSans}`;
       ctx.fillText((tagline || 'SLOGAN HERE').toUpperCase(), rightCenterX, miniLogoY + 90);
 
       // Bottom colored strip across full card width
@@ -214,7 +214,7 @@ module.exports = {
 
       // Centered URL in white inside bottom strip
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `18px ${fontSans}`;
+      ctx.font = `17px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`•   ${website || 'www.yourwebsite.com'}   •`, width / 2, height - footerH / 2);

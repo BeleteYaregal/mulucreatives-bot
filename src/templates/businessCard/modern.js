@@ -70,7 +70,7 @@ module.exports = {
 
       // Company Name
       ctx.fillStyle = textDark;
-      ctx.font = `bold 40px ${fontSans}`;
+      ctx.font = `bold 32px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText(company || 'Larana, Inc.', centerX, centerY + 30);
@@ -97,7 +97,7 @@ module.exports = {
 
       // Website URL inside the tab
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold 20px ${fontSans}`;
+      ctx.font = `bold 17px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(website || 'www.reallygreatsite.com', centerX, tabY + tabH / 2);
@@ -131,12 +131,12 @@ module.exports = {
       ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      const nameSize = fitText(ctx, name || 'Avery Davis', 400, 48, fontSans);
+      const nameSize = fitText(ctx, name || 'Avery Davis', 400, 38, fontSans);
       ctx.font = `bold ${nameSize}px ${fontSans}`;
       ctx.fillText(name || 'Avery Davis', 80, 160);
 
       ctx.fillStyle = themeAccent;
-      ctx.font = `20px ${fontSans}`;
+      ctx.font = `18px ${fontSans}`;
       ctx.fillText(title || 'Director', 80, 215);
       
       // Divider line in left panel
@@ -157,7 +157,7 @@ module.exports = {
       }
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold 28px ${fontSans}`;
+      ctx.font = `bold 22px ${fontSans}`;
       ctx.fillText(company || 'Larana, Inc.', 80, lY + 95);
 
       // Right Side Content (x=600): Contact details
@@ -180,7 +180,7 @@ module.exports = {
 
         // Draw value text
         ctx.fillStyle = textDark;
-        ctx.font = `20px ${fontSans}`;
+        ctx.font = `17px ${fontSans}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(value, startX + 65, contactY + 12);
