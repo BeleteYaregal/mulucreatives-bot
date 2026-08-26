@@ -109,16 +109,16 @@ function drawIconBadge(ctx, cx, cy, r, bgColor, drawFn) {
   ctx.restore();
 }
 
-function drawPhoneIcon(ctx, cx, cy, s) {
-  ctx.fillStyle = '#FFFFFF';
+function drawPhoneIcon(ctx, cx, cy, s, color = '#FFFFFF') {
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.arc(cx - s * 0.2, cy + s * 0.2, s * 0.35, 0, Math.PI * 2);
   ctx.fillRect(cx - s * 0.4, cy - s * 0.5, s * 0.4, s * 0.8);
   ctx.fill();
 }
 
-function drawTelegramIcon(ctx, cx, cy, s) {
-  ctx.fillStyle = '#FFFFFF';
+function drawTelegramIcon(ctx, cx, cy, s, color = '#FFFFFF') {
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(cx - s * 0.5, cy);
   ctx.lineTo(cx + s * 0.6, cy - s * 0.5);
@@ -128,8 +128,8 @@ function drawTelegramIcon(ctx, cx, cy, s) {
   ctx.fill();
 }
 
-function drawEmailIcon(ctx, cx, cy, s) {
-  ctx.strokeStyle = '#FFFFFF';
+function drawEmailIcon(ctx, cx, cy, s, color = '#FFFFFF') {
+  ctx.strokeStyle = color;
   ctx.lineWidth = 2.5;
   ctx.strokeRect(cx - s * 0.6, cy - s * 0.4, s * 1.2, s * 0.8);
   ctx.beginPath();
@@ -139,14 +139,14 @@ function drawEmailIcon(ctx, cx, cy, s) {
   ctx.stroke();
 }
 
-function drawLocationIcon(ctx, cx, cy, s) {
-  ctx.fillStyle = '#FFFFFF';
+function drawLocationIcon(ctx, cx, cy, s, color = '#FFFFFF', innerColor = '#1E60D5') {
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.arc(cx, cy - s * 0.2, s * 0.45, Math.PI, 0, false);
   ctx.lineTo(cx, cy + s * 0.6);
   ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = '#1E60D5';
+  ctx.fillStyle = innerColor;
   ctx.beginPath();
   ctx.arc(cx, cy - s * 0.2, s * 0.18, 0, Math.PI * 2);
   ctx.fill();
