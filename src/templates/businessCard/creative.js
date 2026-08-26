@@ -1,81 +1,83 @@
-const { drawRoundedRect, drawCircularImage, fitText, loadImageFromBuffer, drawGradientRect, drawIconBadge, drawPhoneIcon, drawTelegramIcon, drawEmailIcon, drawLocationIcon, drawCheckIcon, drawQRCode } = require('../../utils/image');
+const { fitText, drawQRCode } = require('../../utils/image');
 
 module.exports = {
   id: 'creative',
-  name: 'Bold Split',
+  name: '06 — Creative',
+  category: 'creative',
   hasBack: true,
   render: async function(canvas, ctx, data) {
-    const { side, name, title, company, phone, email, telegram, website, location, tagline, services, logoBuffer, colors } = data;
+    const { side, name, title, company, phone, email, telegram, website, location, tagline, colors } = data;
     const width = canvas.width;
     const height = canvas.height;
-    const primary = colors?.primary || '#ff4b4b';
-    const dark = '#1a1a1a';
     
+    const bg = '#18181B'; // Deep Matte Charcoal
+    const textWhite = '#FAFAFA';
+    const accentVibrant = colors?.secondary || '#E11D48'; // Vibrant Crimson / Rose
+    const muted = '#A1A1AA';
+
+    ctx.save();
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, width, height);
+
     if (side === 'front') {
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, width, height);
+      // Experimental Asymmetric Composition
+      const startX = 80;
 
-      // Diagonal split
-      ctx.fillStyle = primary;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(width * 0.45, 0);
-      ctx.lineTo(width * 0.25, height);
-      ctx.lineTo(0, height);
-      ctx.fill();
+      // Top Left: Company
+      ctx.fillStyle = accentVibrant;
+      ctx.font = 'bold 28px "Arial", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText((company || 'MuluCreatives').toUpperCase(), startX, 110);
 
-      // Photo or Logo in circle
-      if (logoBuffer) {
-        const logo = await loadImageFromBuffer(logoBuffer);
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(width * 0.2, height / 2, 120, 0, Math.PI * 2);
-        ctx.clip();
-        ctx.drawImage(logo, width * 0.2 - 120, height / 2 - 120, 240, 240);
-        ctx.restore();
+      // Center Asymmetric Name Typography
+      ctx.fillStyle = textWhite;
+      const nameSize = fitText(ctx, name || 'Abel Tesfaye', 750, 64, 'Arial');
+      ctx.font = `bold ${nameSize}px "Arial", sans-serif`;
+      ctx.fillText(name || 'Abel Tesfaye', startX, 290);
+
+      ctx.fillStyle = muted;
+      ctx.font = '24px "Arial", sans-serif';
+      ctx.fillText((title || 'Creative Lead').toUpperCase(), startX, 340);
+
+      // Solid Offset Accent Block
+      ctx.fillStyle = accentVibrant;
+      ctx.fillRect(startX, 390, 80, 6);
+
+      // Contact Information Column
+      ctx.fillStyle = textWhite;
+      ctx.font = '20px "Arial", sans-serif';
+      let cy = 460;
+      const stepY = 35;
+
+      if (phone) {
+        ctx.fillText(phone, startX, cy);
+        cy += stepY;
+      }
+      if (email) {
+        ctx.fillText(email, startX, cy);
+        cy += stepY;
+      }
+      if (website || telegram) {
+        ctx.fillText(website || telegram, startX, cy);
       }
 
-      ctx.fillStyle = dark;
-      ctx.textAlign = 'left';
-      ctx.font = 'bold 80px "Montserrat", sans-serif';
-      ctx.fillText((name || '').toUpperCase(), width * 0.4, 250);
-      
-      ctx.fillStyle = primary;
-      ctx.font = 'bold 30px "Montserrat", sans-serif';
-      ctx.fillText((title || '').toUpperCase(), width * 0.4 + 5, 300);
-
-      ctx.fillStyle = '#555555';
-      ctx.font = '22px "Montserrat", sans-serif';
-      let cy = 450;
-      const contacts = [phone, email, telegram, website, location];
-      contacts.forEach(c => {
-        if (c) {
-          ctx.fillText(c, width * 0.4, cy);
-          cy += 45;
-        }
-      });
-
     } else {
-      ctx.fillStyle = dark;
-      ctx.fillRect(0, 0, width, height);
+      // --- Back Side ---
+      const centerX = width / 2;
+      const centerY = height / 2;
 
-      ctx.fillStyle = primary;
-      ctx.beginPath();
-      ctx.moveTo(width, height);
-      ctx.lineTo(width * 0.55, height);
-      ctx.lineTo(width * 0.75, 0);
-      ctx.lineTo(width, 0);
-      ctx.fill();
+      ctx.fillStyle = accentVibrant;
+      ctx.fillRect(0, 0, width, 20);
 
-      ctx.fillStyle = '#ffffff';
+      const qrSize = 220;
+      drawQRCode(ctx, telegram || website || 'https://t.me/MuluCreativesbot', centerX - qrSize / 2, centerY - 90, qrSize, accentVibrant, bg);
+
+      ctx.fillStyle = textWhite;
+      ctx.font = 'bold 40px "Arial", sans-serif';
       ctx.textAlign = 'center';
-      ctx.font = 'bold 60px "Montserrat", sans-serif';
-      ctx.fillText(company || '', width * 0.35, height / 2);
-      ctx.font = '24px "Montserrat", sans-serif';
-      ctx.fillText(tagline || '', width * 0.35, height / 2 + 50);
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(width * 0.75 - 75, height / 2 - 120, 240, 240);
+      ctx.fillText((company || 'MuluCreatives').toUpperCase(), centerX, centerY + 170);
     }
+
+    ctx.restore();
   }
 };

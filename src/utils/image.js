@@ -159,6 +159,54 @@ function drawCheckIcon(ctx, cx, cy, s, color = '#FFFFFF') {
 }
 
 /**
+ * Draws a subtle contemporary Ethiopian manuscript border geometry motif
+ */
+function drawEthiopianMotif(ctx, x, y, length, color = '#D4A017') {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 2;
+
+  const step = 20;
+  for (let i = 0; i < length; i += step) {
+    const cx = x + i;
+    const cy = y;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 8);
+    ctx.lineTo(cx + 8, cy);
+    ctx.lineTo(cx, cy + 8);
+    ctx.lineTo(cx - 8, cy);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.fillRect(cx - 2, cy - 2, 4, 4);
+  }
+  ctx.restore();
+}
+
+/**
+ * Draws clean typographic monogram initials inside a subtle boundary
+ */
+function drawMonogram(ctx, text, x, y, size, color = '#D4AF37') {
+  if (!text) return;
+  const initials = text.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = color;
+  ctx.font = `bold ${Math.floor(size * 0.45)}px "Georgia", serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(initials, x + size / 2, y + size / 2);
+  ctx.restore();
+}
+
+/**
  * Renders a clean vector QR Code on canvas
  */
 function drawQRCode(ctx, text, x, y, size, primaryColor = '#0D1B2A', bgColor = '#FFFFFF') {
@@ -180,14 +228,13 @@ function drawQRCode(ctx, text, x, y, size, primaryColor = '#0D1B2A', bgColor = '
   const startX = x + innerMargin;
   const startY = y + innerMargin;
 
-  // Simple deterministic pseudorandom matrix seeded by text
   let seed = 0;
   for (let i = 0; i < text.length; i++) seed = (seed << 5) - seed + text.charCodeAt(i);
   
   function isFinderPattern(r, c) {
-    if (r < 7 && c < 7) return true; // Top-left
-    if (r < 7 && c >= modules - 7) return true; // Top-right
-    if (r >= modules - 7 && c < 7) return true; // Bottom-left
+    if (r < 7 && c < 7) return true;
+    if (r < 7 && c >= modules - 7) return true;
+    if (r >= modules - 7 && c < 7) return true;
     return false;
   }
 
@@ -196,14 +243,12 @@ function drawQRCode(ctx, text, x, y, size, primaryColor = '#0D1B2A', bgColor = '
   for (let r = 0; r < modules; r++) {
     for (let c = 0; c < modules; c++) {
       if (isFinderPattern(r, c)) continue;
-      // Timing pattern
       if (r === 6 || c === 6) {
         if ((r + c) % 2 === 0) {
           ctx.fillRect(startX + c * cellSize, startY + r * cellSize, cellSize - 0.5, cellSize - 0.5);
         }
         continue;
       }
-      // Pseudo data modules
       const val = (Math.abs(Math.sin(seed * (r * modules + c + 1))) * 10000) % 1;
       if (val > 0.45) {
         ctx.fillRect(startX + c * cellSize, startY + r * cellSize, cellSize - 0.5, cellSize - 0.5);
@@ -211,20 +256,17 @@ function drawQRCode(ctx, text, x, y, size, primaryColor = '#0D1B2A', bgColor = '
     }
   }
 
-  // Draw 3 Position Finder Patterns (Top-Left, Top-Right, Bottom-Left)
+  // Draw 3 Position Finder Patterns
   const finders = [[0, 0], [0, modules - 7], [modules - 7, 0]];
   finders.forEach(([fr, fc]) => {
     const fx = startX + fc * cellSize;
     const fy = startY + fr * cellSize;
     const fsize = 7 * cellSize;
 
-    // Outer box
     ctx.fillStyle = primaryColor;
     ctx.fillRect(fx, fy, fsize, fsize);
-    // Inner white gap
     ctx.fillStyle = bgColor;
     ctx.fillRect(fx + cellSize, fy + cellSize, fsize - 2 * cellSize, fsize - 2 * cellSize);
-    // Center solid box
     ctx.fillStyle = primaryColor;
     ctx.fillRect(fx + 2 * cellSize, fy + 2 * cellSize, fsize - 4 * cellSize, fsize - 4 * cellSize);
   });
@@ -246,5 +288,7 @@ module.exports = {
   drawEmailIcon,
   drawLocationIcon,
   drawCheckIcon,
+  drawEthiopianMotif,
+  drawMonogram,
   drawQRCode
 };

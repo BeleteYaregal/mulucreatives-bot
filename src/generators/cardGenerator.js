@@ -4,27 +4,37 @@ const { createCanvas, loadImage } = require('canvas');
 const pdfService = require('../services/pdfService');
 const schemes = require('../data/colorSchemes');
 const db = require('../database/db');
+const { validateCardQuality } = require('../utils/qualityControl');
 
 const templates = {
-  corporate: require('../templates/businessCard/corporate'),
-  modern: require('../templates/businessCard/modern'),
-  minimal: require('../templates/businessCard/minimal'),
-  luxury: require('../templates/businessCard/luxury'),
-  creative: require('../templates/businessCard/creative'),
+  swissMinimal: require('../templates/businessCard/swissMinimal'),
+  darkLuxury: require('../templates/businessCard/darkLuxury'),
+  modernCorporate: require('../templates/businessCard/modernCorporate'),
+  editorial: require('../templates/businessCard/editorial'),
   technology: require('../templates/businessCard/technology'),
-  elegant: require('../templates/businessCard/elegant')
+  creative: require('../templates/businessCard/creative'),
+  ethiopianModern: require('../templates/businessCard/ethiopianModern'),
+  darkPremium: require('../templates/businessCard/darkPremium'),
+  elegantSerif: require('../templates/businessCard/elegantSerif'),
+  executiveMonogram: require('../templates/businessCard/executiveMonogram'),
+  // Fallback aliases for legacy template keys
+  modern: require('../templates/businessCard/swissMinimal'),
+  luxury: require('../templates/businessCard/darkLuxury'),
+  corporate: require('../templates/businessCard/modernCorporate'),
+  minimal: require('../templates/businessCard/swissMinimal'),
+  elegant: require('../templates/businessCard/elegantSerif')
 };
 
 /**
- * Generates a business card (front, back, preview, PDF).
+ * Generates a high-definition print-ready business card (front, back, preview, PDF).
  * @param {Object} data - Card data.
  * @param {string} templateName - Name of the template to use.
  * @param {string} colorName - Name of the color scheme to use.
  * @returns {Promise<Object>} - Contains buffers and paths.
  */
-async function generateCard(data, templateName, colorName) {
-  const template = templates[templateName] || templates.modern;
-  const colors = schemes[colorName] || schemes.ocean;
+async function generateCard(data, templateName = 'swissMinimal', colorName = 'obsidian_ivory') {
+  const template = templates[templateName] || templates.swissMinimal;
+  const colors = schemes[colorName] || schemes.obsidian_ivory;
   const templateData = { ...data, colors };
 
   const cardWidth = 1400;
@@ -36,7 +46,10 @@ async function generateCard(data, templateName, colorName) {
   await template.render(frontCanvas, frontCtx, { ...templateData, side: 'front' });
   const frontBuffer = frontCanvas.toBuffer('image/png');
 
-  // 2. Back Canvas (if template has back side)
+  // Quality Control check on front canvas
+  validateCardQuality(frontCanvas, data);
+
+  // 2. Back Canvas (if template supports back side)
   let backBuffer = null;
   if (template.hasBack !== false) {
     try {
@@ -49,11 +62,10 @@ async function generateCard(data, templateName, colorName) {
     }
   }
 
-  // 3. Preview Canvas (Combined with shadows)
+  // 3. Preview Canvas (Presentation Stacked Showcase)
   const previewCanvas = createCanvas(1500, 1750);
   const previewCtx = previewCanvas.getContext('2d');
   
-  // Background
   previewCtx.fillStyle = '#F0F2F5';
   previewCtx.fillRect(0, 0, 1500, 1750);
 
@@ -61,7 +73,6 @@ async function generateCard(data, templateName, colorName) {
     const img = await loadImage(imgBuffer);
     previewCtx.save();
     
-    // Soft drop shadow
     previewCtx.shadowColor = 'rgba(0, 0, 0, 0.25)';
     previewCtx.shadowBlur = 40;
     previewCtx.shadowOffsetX = 0;
@@ -71,10 +82,8 @@ async function generateCard(data, templateName, colorName) {
     previewCtx.restore();
   };
 
-  // Draw Front
+  // Draw Front & Back on Preview Showcase
   await drawShadowAndCard(frontBuffer, 50, 50, 1400, 800);
-  
-  // Draw Back
   if (backBuffer) {
     await drawShadowAndCard(backBuffer, 50, 900, 1400, 800);
   }
@@ -94,13 +103,12 @@ async function generateCard(data, templateName, colorName) {
   const pdfPath = path.join(pdfDir, `card_${timestamp}.pdf`);
   const previewPath = path.join(generatedDir, `card_preview_${timestamp}.png`);
 
-  // Save files asynchronously
   try {
     fs.writeFileSync(frontPath, frontBuffer);
     if (backBuffer) fs.writeFileSync(backPath, backBuffer);
     fs.writeFileSync(previewPath, previewBuffer);
 
-    // Generate PDF using pdfService
+    // Generate Print-Ready PDF via pdfService
     await pdfService.createBusinessCardPDF(frontBuffer, backBuffer, pdfPath, { 
       title: `${data.name || 'Business'} Card`
     });

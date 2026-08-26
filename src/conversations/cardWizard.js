@@ -30,42 +30,45 @@ async function cardWizard(conversation, ctx) {
     website: '',
     location: '',
     logoBuffer: null,
-    template: 'modern',
-    colors: 'ocean'
+    template: 'swissMinimal',
+    colors: 'obsidian_ivory'
   };
 
-  // --- Step 1: Template Selection ---
+  // --- Step 1: 10 Professional Design Families Keyboard ---
   const tplKeyboard = new InlineKeyboard()
-    .text("🟦 Corporate Blue", "tpl_corporate")
-    .text("🔵 Abel Modern", "tpl_modern").row()
-    .text("⚪ Ultra Minimal", "tpl_minimal")
-    .text("⬛ Luxury Gold", "tpl_luxury").row()
-    .text("🟣 Creative Bold", "tpl_creative")
-    .text("🟢 Tech Hexagon", "tpl_technology").row()
-    .text("🌸 Elegant Serif", "tpl_elegant");
+    .text("01 | Swiss Minimal", "tpl_swissMinimal")
+    .text("02 | Dark Luxury", "tpl_darkLuxury").row()
+    .text("03 | Modern Corporate", "tpl_modernCorporate")
+    .text("04 | Editorial", "tpl_editorial").row()
+    .text("05 | Technology", "tpl_technology")
+    .text("06 | Creative", "tpl_creative").row()
+    .text("07 | Ethiopian Modern 🇪🇹", "tpl_ethiopianModern")
+    .text("08 | Dark Premium", "tpl_darkPremium").row()
+    .text("09 | Elegant Serif", "tpl_elegantSerif")
+    .text("10 | Executive Monogram", "tpl_executiveMonogram");
 
-  await ctx.reply("🎨 <b>Choose a Business Card Template Style:</b>", { parse_mode: 'HTML', reply_markup: tplKeyboard });
+  await ctx.reply("🎨 <b>Select a Professional Design Family:</b>\n\n<i>Each template family has a unique, agency-grade layout &amp; composition.</i>", { parse_mode: 'HTML', reply_markup: tplKeyboard });
   const tplQuery = await conversation.waitForCallbackQuery(/tpl_/);
   data.template = tplQuery.callbackQuery.data.replace('tpl_', '');
   await tplQuery.answerCallbackQuery().catch(() => {});
 
   // --- Step 2: Form Collection ---
-  await ctx.reply("📝 What is your <b>Full Name</b>? (e.g. Belete Yaregal)", { parse_mode: 'HTML' });
+  await ctx.reply("📝 What is your <b>Full Name</b>? (e.g. Abel Tesfaye)", { parse_mode: 'HTML' });
   const nameCtx = await conversation.waitFor('message:text');
   data.name = nameCtx.message.text.trim();
 
-  await ctx.reply("💼 What is your <b>Job Title</b>? (e.g. Graphics Designer)", { parse_mode: 'HTML' });
+  await ctx.reply("💼 What is your <b>Job Title</b>? (e.g. Senior Creative Director)", { parse_mode: 'HTML' });
   const titleCtx = await conversation.waitFor('message:text');
   data.title = titleCtx.message.text.trim();
 
-  await ctx.reply("🏢 What is your <b>Company or Brand Name</b>? (e.g. Sebez Systems)", { parse_mode: 'HTML' });
+  await ctx.reply("🏢 What is your <b>Company or Brand Name</b>? (e.g. MuluCreatives)", { parse_mode: 'HTML' });
   const companyCtx = await conversation.waitFor('message:text');
   data.company = companyCtx.message.text.trim();
 
   // Phone validation loop
   let validPhone = false;
   while (!validPhone) {
-    await ctx.reply("📞 What is your <b>Phone Number</b>? (e.g. 0901135018 or +251 901 135 018)", { parse_mode: 'HTML' });
+    await ctx.reply("📞 What is your <b>Phone Number</b>? (e.g. +251 901 135 018)", { parse_mode: 'HTML' });
     const phoneCtx = await conversation.waitFor('message:text');
     const res = validatePhone(phoneCtx.message.text.trim());
     if (res.valid) {
@@ -76,7 +79,7 @@ async function cardWizard(conversation, ctx) {
     }
   }
 
-  // Email validation loop
+  // Email validation
   await ctx.reply("📧 What is your <b>Email Address</b>? (or send /skip)", { parse_mode: 'HTML' });
   const emailCtx = await conversation.wait();
   if (emailCtx.message?.text && emailCtx.message.text !== '/skip') {
@@ -84,7 +87,7 @@ async function cardWizard(conversation, ctx) {
     data.email = res.formatted;
   }
 
-  // Telegram validation loop
+  // Telegram validation
   await ctx.reply("✈️ What is your <b>Telegram Handle</b>? (e.g. @beleteyaregal or /skip)", { parse_mode: 'HTML' });
   const tgCtx = await conversation.wait();
   if (tgCtx.message?.text && tgCtx.message.text !== '/skip') {
@@ -93,7 +96,7 @@ async function cardWizard(conversation, ctx) {
   }
 
   // Website validation
-  await ctx.reply("🌐 What is your <b>Website URL</b>? (e.g. sebezsystems.com or /skip)", { parse_mode: 'HTML' });
+  await ctx.reply("🌐 What is your <b>Website URL</b>? (e.g. mulucreatives.com or /skip)", { parse_mode: 'HTML' });
   const webCtx = await conversation.wait();
   if (webCtx.message?.text && webCtx.message.text !== '/skip') {
     const res = validateWebsite(webCtx.message.text.trim());
@@ -115,14 +118,18 @@ async function cardWizard(conversation, ctx) {
     data.logoBuffer = await conversation.external(() => downloadFile(ctx, photo.file_id));
   }
 
-  // Color Palette Selection
+  // Color Palette Selection (9 Professional Palettes)
   const colorKeyboard = new InlineKeyboard()
-    .text("🌊 Ocean Blue", "color_ocean")
-    .text("🌅 Sunset Red", "color_sunset")
-    .text("🌲 Forest Green", "color_forest").row()
-    .text("👑 Royal Purple", "color_royal")
-    .text("🌙 Midnight Dark", "color_midnight")
-    .text("🌍 Earth Brown", "color_earth");
+    .text("⬛ Obsidian & Ivory", "color_obsidian_ivory")
+    .text("⚪ Swiss Clean", "color_swiss_clean").row()
+    .text("🔵 Navy & Silver", "color_navy_silver")
+    .text("👑 Charcoal & Gold", "color_charcoal_gold").row()
+    .text("🌲 Forest & Cream", "color_forest_cream")
+    .text("🍷 Burgundy & Ivory", "color_burgundy_ivory").row()
+    .text("⚡ Slate & Cyan", "color_slate_cyan")
+    .text("🧱 Terracotta & Cream", "color_terracotta_cream").row()
+    .text("🇪🇹 Ethiopian Modern", "color_ethiopian_modern");
+
   await ctx.reply("🎨 Select a Color Palette:", { reply_markup: colorKeyboard });
   const colorQuery = await conversation.waitForCallbackQuery(/color_/);
   data.colors = colorQuery.callbackQuery.data.replace('color_', '');
@@ -140,7 +147,7 @@ async function cardWizard(conversation, ctx) {
     } catch (err) {
       console.error("Rendering error:", err);
       await ctx.reply("❌ Error rendering preview. Falling back to default styling.");
-      cardResult = await conversation.external(() => generateCard(data, 'modern', 'ocean'));
+      cardResult = await conversation.external(() => generateCard(data, 'swissMinimal', 'obsidian_ivory'));
     }
 
     const editKeyboard = new InlineKeyboard()
@@ -156,7 +163,7 @@ async function cardWizard(conversation, ctx) {
       .text("✅ CONFIRM & DOWNLOAD FILES", "confirm_order").row()
       .text("🏠 Main Menu", "back_menu");
 
-    const captionText = `✨ <b>MuluCreatives Live Card Preview</b>\n\n👤 <b>Name:</b> ${escapeHtml(data.name)}\n💼 <b>Title:</b> ${escapeHtml(data.title)}\n🏢 <b>Company:</b> ${escapeHtml(data.company)}\n📞 <b>Phone:</b> ${escapeHtml(data.phone)}\n📧 <b>Email:</b> ${escapeHtml(data.email || 'None')}\n✈️ <b>Telegram:</b> ${escapeHtml(data.telegram || 'None')}\n🎨 <b>Template:</b> ${data.template} | <b>Theme:</b> ${data.colors}\n\n<i>Review your design or use the buttons below to edit:</i>`;
+    const captionText = `✨ <b>MuluCreatives Live Card Preview</b>\n\n👤 <b>Name:</b> ${escapeHtml(data.name)}\n💼 <b>Title:</b> ${escapeHtml(data.title)}\n🏢 <b>Company:</b> ${escapeHtml(data.company)}\n📞 <b>Phone:</b> ${escapeHtml(data.phone)}\n📧 <b>Email:</b> ${escapeHtml(data.email || 'None')}\n✈️ <b>Telegram:</b> ${escapeHtml(data.telegram || 'None')}\n🎨 <b>Template:</b> ${data.template} | <b>Palette:</b> ${data.colors}\n\n<i>Review your design or use the buttons below to edit:</i>`;
 
     await ctx.replyWithPhoto(new InputFile(cardResult.previewBuffer, 'Preview.png'), {
       caption: captionText,
@@ -212,7 +219,7 @@ async function cardWizard(conversation, ctx) {
 
       if (cardResult.backBuffer) {
         await ctx.replyWithDocument(new InputFile(cardResult.backBuffer, `${data.name.replace(/\s+/g, '_')}_Back_300DPI.png`), {
-          caption: `📄 <b>Back Side</b> (300 DPI High-Resolution PNG with QR Code)`
+          caption: `📄 <b>Back Side</b> (300 DPI High-Resolution Vector PNG)`
         });
       }
 
@@ -266,12 +273,12 @@ async function cardWizard(conversation, ctx) {
       const res = validateTelegram(editMsg.message.text.trim());
       if (res.valid) data.telegram = res.formatted;
     } else if (action === 'edit_template') {
-      await ctx.reply("🎨 Choose a Template:", { reply_markup: tplKeyboard });
+      await ctx.reply("🎨 Select a Professional Design Family:", { reply_markup: tplKeyboard });
       const editTplQuery = await conversation.waitForCallbackQuery(/tpl_/);
       data.template = editTplQuery.callbackQuery.data.replace('tpl_', '');
       await editTplQuery.answerCallbackQuery().catch(() => {});
     } else if (action === 'edit_color') {
-      await ctx.reply("🎨 Choose a Color Palette:", { reply_markup: colorKeyboard });
+      await ctx.reply("🎨 Select a Color Palette:", { reply_markup: colorKeyboard });
       const editColorQuery = await conversation.waitForCallbackQuery(/color_/);
       data.colors = editColorQuery.callbackQuery.data.replace('color_', '');
       await editColorQuery.answerCallbackQuery().catch(() => {});
