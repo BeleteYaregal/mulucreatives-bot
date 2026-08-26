@@ -1,9 +1,9 @@
 const { createCanvas, loadImage } = require('canvas');
 
 const FONTS = {
-  sans: '"Liberation Sans", "DejaVu Sans", sans-serif',
-  serif: '"Liberation Serif", "DejaVu Serif", serif',
-  mono: '"Liberation Mono", "DejaVu Sans Mono", monospace'
+  sans: 'Arial, "Liberation Sans", "DejaVu Sans", sans-serif',
+  serif: 'Georgia, "Liberation Serif", "DejaVu Serif", serif',
+  mono: '"Courier New", "Liberation Mono", "DejaVu Sans Mono", monospace'
 };
 
 function drawRoundedRect(ctx, x, y, width, height, radius) {
