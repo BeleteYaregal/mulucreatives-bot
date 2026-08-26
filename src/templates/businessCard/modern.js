@@ -1,162 +1,210 @@
-const { drawRoundedRect, loadImageFromBuffer, drawIconBadge, drawPhoneIcon, drawTelegramIcon, drawEmailIcon, drawLocationIcon, drawCheckIcon, drawQRCode } = require('../../utils/image');
+const { FONTS, drawQRCode, loadImageFromBuffer, fitText, drawPhoneIcon, drawEmailIcon, drawLocationIcon } = require('../../utils/image');
 
 module.exports = {
   id: 'modern',
-  name: 'Modern Chevron',
+  name: '02 — Modern Chevron',
+  category: 'modern',
   hasBack: true,
+  
   render: async function(canvas, ctx, data) {
-    const { side, name, title, company, phone, email, telegram, website, location, tagline, services, logoBuffer, colors } = data;
+    const { side, name, title, company, phone, email, website, location, logoBuffer, colors } = data;
     const width = canvas.width;
     const height = canvas.height;
     
-    const primary = colors?.primary || '#0066FF';
-    const secondary = colors?.secondary || '#00B4D8';
-    const darkNavy = '#0F172A';
-    const canvasBg = '#F8FAFC';
+    // Fallback fonts
+    const fontSans = FONTS?.sans || '"Liberation Sans", "DejaVu Sans", sans-serif';
+    
+    const themeBg = colors.bg || '#1B4332'; // Dark green/dark slate
+    const themeAccent = colors.secondary || '#52B788'; // Soft green accent
     const textDark = '#1E293B';
     const textMuted = '#64748B';
-
+    
     ctx.save();
+    
+    // Draw geometric flower/clover logo (similar to Reference 2)
+    const drawFlowerLogo = (gCtx, cx, cy, size, color) => {
+      gCtx.save();
+      gCtx.fillStyle = color;
+      
+      // Draw 6 petals as circles/ellipses
+      const petals = 8;
+      const radius = size * 0.28;
+      for (let i = 0; i < petals; i++) {
+        const angle = (i * Math.PI * 2) / petals;
+        const px = cx + Math.cos(angle) * radius;
+        const py = cy + Math.sin(angle) * radius;
+        
+        gCtx.beginPath();
+        gCtx.arc(px, py, size * 0.2, 0, Math.PI * 2);
+        gCtx.fill();
+      }
+      
+      // Center circle
+      gCtx.beginPath();
+      gCtx.arc(cx, cy, size * 0.15, 0, Math.PI * 2);
+      gCtx.fillStyle = '#FFFFFF';
+      gCtx.fill();
+      gCtx.restore();
+    };
 
     if (side === 'front') {
-      // 1. Background
-      ctx.fillStyle = canvasBg;
+      // --- Front Brand Cover Side ---
+      // White canvas background
+      ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Dual Chevron Ribbons
-      ctx.fillStyle = primary;
-      ctx.beginPath();
-      ctx.moveTo(480, 0);
-      ctx.lineTo(760, 0);
-      ctx.lineTo(580, height);
-      ctx.lineTo(300, height);
-      ctx.closePath();
-      ctx.fill();
+      const centerX = width / 2;
+      const centerY = height / 2;
 
-      ctx.fillStyle = secondary;
-      ctx.beginPath();
-      ctx.moveTo(760, 0);
-      ctx.lineTo(820, 0);
-      ctx.lineTo(640, height);
-      ctx.lineTo(580, height);
-      ctx.closePath();
-      ctx.fill();
-
-      // Right Dark Section
-      ctx.fillStyle = darkNavy;
-      ctx.beginPath();
-      ctx.moveTo(820, 0);
-      ctx.lineTo(width, 0);
-      ctx.lineTo(width, height);
-      ctx.lineTo(640, height);
-      ctx.closePath();
-      ctx.fill();
-
-      // Top Accent Line
-      ctx.fillStyle = primary;
-      ctx.fillRect(0, 0, 480, 12);
-
-      // 3. Left Content (Logo, Name, Title, Company)
+      // Draw Logo
       if (logoBuffer) {
         try {
           const logo = await loadImageFromBuffer(logoBuffer);
-          ctx.drawImage(logo, 80, 70, 90, 90);
-        } catch (e) {}
+          ctx.drawImage(logo, centerX - 55, centerY - 150, 110, 110);
+        } catch (e) {
+          drawFlowerLogo(ctx, centerX, centerY - 90, 100, themeBg);
+        }
+      } else {
+        drawFlowerLogo(ctx, centerX, centerY - 90, 100, themeBg);
       }
 
+      // Company Name
       ctx.fillStyle = textDark;
-      ctx.font = 'bold 36px "Arial", sans-serif';
+      ctx.font = `bold 40px ${fontSans}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(company || 'Larana, Inc.', centerX, centerY + 30);
+
+      // Bottom dark panel
+      const bottomPanelH = 140;
+      ctx.fillStyle = themeBg;
+      ctx.fillRect(0, height - bottomPanelH, width, bottomPanelH);
+
+      // Curved folder tab ribbon in the middle of the bottom panel (like Reference 2)
+      ctx.fillStyle = themeAccent;
+      const tabW = 400;
+      const tabH = 50;
+      const tabX = centerX - tabW / 2;
+      const tabY = height - bottomPanelH - tabH + 10;
+      
+      ctx.beginPath();
+      ctx.moveTo(tabX - 25, height - bottomPanelH + 10);
+      ctx.bezierCurveTo(tabX - 5, height - bottomPanelH + 10, tabX - 5, tabY, tabX + 20, tabY);
+      ctx.lineTo(tabX + tabW - 20, tabY);
+      ctx.bezierCurveTo(tabX + tabW + 5, tabY, tabX + tabW + 5, height - bottomPanelH + 10, tabX + tabW + 25, height - bottomPanelH + 10);
+      ctx.closePath();
+      ctx.fill();
+
+      // Website URL inside the tab
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `bold 20px ${fontSans}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(website || 'www.reallygreatsite.com', centerX, tabY + tabH / 2);
+
+    } else {
+      // --- Back Details Side ---
+      // Left solid panel (40%)
+      ctx.fillStyle = themeBg;
+      ctx.fillRect(0, 0, 520, height);
+
+      // Tab divider separator on the boundary (x=520, y=0 to height)
+      ctx.fillStyle = themeAccent;
+      ctx.fillRect(520, 0, 12, height);
+      
+      // Draw a curved tab shape in the middle of the divider strip (x=520, y=280 to 520)
+      const tabY = 300;
+      const tabH = 200;
+      ctx.beginPath();
+      ctx.moveTo(520 + 12, tabY - 30);
+      ctx.bezierCurveTo(520 + 12, tabY - 5, 520 + 35, tabY, 520 + 35, tabY + 25);
+      ctx.lineTo(520 + 35, tabY + tabH - 25);
+      ctx.bezierCurveTo(520 + 35, tabY + tabH, 520 + 12, tabY + tabH + 5, 520 + 12, tabY + tabH + 30);
+      ctx.closePath();
+      ctx.fill();
+
+      // White right content side
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(520 + 12, 0, width - (520 + 12), height);
+
+      // Left panel content: Name & Title & Logo
+      ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'left';
-      ctx.fillText((company || 'MuluCreatives').toUpperCase(), logoBuffer ? 190 : 80, 110);
+      ctx.textBaseline = 'top';
+      const nameSize = fitText(ctx, name || 'Avery Davis', 400, 48, fontSans);
+      ctx.font = `bold ${nameSize}px ${fontSans}`;
+      ctx.fillText(name || 'Avery Davis', 80, 160);
 
-      if (tagline) {
-        ctx.fillStyle = textMuted;
-        ctx.font = '20px "Arial", sans-serif';
-        ctx.fillText(tagline, logoBuffer ? 190 : 80, 145);
+      ctx.fillStyle = themeAccent;
+      ctx.font = `20px ${fontSans}`;
+      ctx.fillText(title || 'Director', 80, 215);
+      
+      // Divider line in left panel
+      ctx.fillStyle = themeAccent;
+      ctx.fillRect(80, 250, 120, 2);
+
+      // Logo on left panel
+      const lY = 460;
+      if (logoBuffer) {
+        try {
+          const logo = await loadImageFromBuffer(logoBuffer);
+          ctx.drawImage(logo, 80, lY, 80, 80);
+        } catch (e) {
+          drawFlowerLogo(ctx, 120, lY + 40, 80, '#FFFFFF');
+        }
+      } else {
+        drawFlowerLogo(ctx, 120, lY + 40, 80, '#FFFFFF');
       }
 
-      // Name & Title
-      ctx.fillStyle = textDark;
-      ctx.font = 'bold 62px "Arial", sans-serif';
-      ctx.fillText(name || 'Abel Tesfaye', 80, 310);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `bold 28px ${fontSans}`;
+      ctx.fillText(company || 'Larana, Inc.', 80, lY + 95);
 
-      ctx.fillStyle = primary;
-      ctx.font = 'bold 26px "Arial", sans-serif';
-      ctx.fillText((title || 'Creative Director').toUpperCase(), 80, 360);
+      // Right Side Content (x=600): Contact details
+      const startX = 600;
+      let contactY = 200;
+      const stepY = 120;
+      const iconSize = 22;
 
-      // 4. Right Content (Contact Information)
-      const rightX = 850;
-      let contactY = 220;
-      const stepY = 70;
-
-      const drawRightContact = (drawIcon, value) => {
+      const drawContactField = (iconDrawFn, value) => {
         if (!value) return;
 
-        drawIconBadge(ctx, rightX + 25, contactY - 8, 22, primary, drawIcon || drawPhoneIcon);
+        // Draw icon badge (curved rectangular box background like Reference 2)
+        ctx.fillStyle = themeAccent;
+        ctx.beginPath();
+        ctx.roundRect(startX, contactY - 10, 44, 44, 10);
+        ctx.fill();
 
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = '22px "Arial", sans-serif';
+        // Draw white icon inside badge
+        iconDrawFn(ctx, startX + 22, contactY + 12, iconSize * 0.55, '#FFFFFF');
+
+        // Draw value text
+        ctx.fillStyle = textDark;
+        ctx.font = `20px ${fontSans}`;
         ctx.textAlign = 'left';
-        ctx.fillText(value, rightX + 65, contactY);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(value, startX + 65, contactY + 12);
+
+        // Thin divider line underneath
+        ctx.strokeStyle = '#E2E8F0';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(startX, contactY + 50);
+        ctx.lineTo(width - 90, contactY + 50);
+        ctx.stroke();
 
         contactY += stepY;
       };
 
-      drawRightContact(drawPhoneIcon, phone);
-      drawRightContact(drawEmailIcon, email);
-      drawRightContact(drawTelegramIcon, telegram);
-      drawRightContact(drawLocationIcon, location);
-      drawRightContact(drawPhoneIcon, website);
-
-    } else {
-      // --- Back Side ---
-      ctx.fillStyle = darkNavy;
-      ctx.fillRect(0, 0, width, height);
-
-      // Bottom Left Chevron Accent
-      ctx.fillStyle = primary;
-      ctx.beginPath();
-      ctx.moveTo(0, height - 220);
-      ctx.lineTo(350, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-      ctx.fill();
-
-      // Vector QR Code Frame
-      const qrSize = 280;
-      const qrX = 100;
-      const qrY = height / 2 - qrSize / 2;
-
-      drawQRCode(ctx, telegram || website || `https://t.me/MuluCreativesbot`, qrX, qrY, qrSize, primary, '#FFFFFF');
-
-      // Right Side Branding & Services
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textAlign = 'left';
-      ctx.font = 'bold 54px "Arial", sans-serif';
-      ctx.fillText(company || 'MuluCreatives', 460, 200);
-
-      ctx.fillStyle = secondary;
-      ctx.font = '24px "Arial", sans-serif';
-      ctx.fillText(website || 'www.mulucreatives.com', 460, 245);
-
-      // Checked Services List
-      const serviceList = services || [
-        'Graphics Design & Branding',
-        'Print-Ready Business Cards',
-        'Logo & Identity Design',
-        'Social Media Marketing Ads'
-      ];
-
-      let sy = 330;
-      serviceList.slice(0, 4).forEach(srv => {
-        drawCheckIcon(ctx, 480, sy - 8, 16, secondary);
-        ctx.fillStyle = '#F1F5F9';
-        ctx.font = '22px "Arial", sans-serif';
-        ctx.fillText(srv, 515, sy);
-        sy += 50;
-      });
+      drawContactField(drawPhoneIcon, phone);
+      drawContactField(drawEmailIcon, email || website);
+      drawContactField(drawLocationIcon, location);
+      
+      // Draw QR Code on the right side if there's space (e.g. top right of right side)
+      const qrSize = 130;
+      drawQRCode(ctx, website || 'https://example.com', width - 90 - qrSize, 50, qrSize, themeBg, '#FFFFFF');
     }
-
+    
     ctx.restore();
   }
 };
