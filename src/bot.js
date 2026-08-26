@@ -105,22 +105,22 @@ bot.command("orders", async (ctx) => {
 });
 
 bot.callbackQuery("menu_card", async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
   await ctx.conversation.enter("cardWizard");
 });
 
 bot.callbackQuery("menu_logo", async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
   await ctx.conversation.enter("logoWizard");
 });
 
 bot.callbackQuery("menu_photo", async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
   await ctx.conversation.enter("photoWizard");
 });
 
 bot.callbackQuery("menu_orders", async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
   const userOrders = db.getUserOrders(ctx.from.id);
   if (!userOrders || userOrders.length === 0) {
     return ctx.reply("📦 <b>My Orders</b>\n\nYou haven't placed any design orders yet! Use /card or /logo to get started.", { parse_mode: 'HTML' });
@@ -130,7 +130,7 @@ bot.callbackQuery("menu_orders", async (ctx) => {
 });
 
 bot.callbackQuery("menu_profile", async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
   const userCards = db.getUserCards(ctx.from.id);
   const userOrders = db.getUserOrders(ctx.from.id);
   const msg = `👤 <b>My Profile</b>\n━━━━━━━━━━━━━━━━━━━━━━\nName: ${ctx.from.first_name} ${ctx.from.last_name || ''}\nUsername: @${ctx.from.username || 'N/A'}\nUser ID: <code>${ctx.from.id}</code> \n\n🪪 Cards Generated: ${userCards.length}\n📦 Total Orders: ${userOrders.length}`;
@@ -138,18 +138,18 @@ bot.callbackQuery("menu_profile", async (ctx) => {
 });
 
 bot.callbackQuery("menu_support", async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
   await ctx.reply("💬 <b>Customer Support</b>\n━━━━━━━━━━━━━━━━━━━━━━\nFor custom graphics design, special printing requests, or business inquiries, contact our team:\n\n📱 Telegram: @MuluCreativesbot\n📧 Email: support@mulucreatives.com", { parse_mode: 'HTML' });
 });
 
 bot.callbackQuery("back_menu", async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
   await ctx.reply(welcomeMsg, { parse_mode: 'HTML', reply_markup: getMainMenuKeyboard() });
 });
 
 bot.callbackQuery(/menu_.+/, async (ctx) => {
   if (['menu_card', 'menu_logo', 'menu_photo', 'menu_orders', 'menu_profile', 'menu_support'].includes(ctx.callbackQuery.data)) return;
-  await ctx.answerCallbackQuery("🚧 Coming soon!");
+  await ctx.answerCallbackQuery("🚧 Coming soon!").catch(() => {});
   await ctx.reply(
     `🚧 <b>Service Coming Soon!</b>\n\nThis graphics service module is currently under development for Ethiopian customers.\nStay tuned for updates! ✨`,
     { parse_mode: 'HTML' }
@@ -159,14 +159,14 @@ bot.callbackQuery(/menu_.+/, async (ctx) => {
 bot.callbackQuery("admin_refresh", handleAdminCommand);
 
 bot.callbackQuery("admin_orders", async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
   const orders = db.getAllOrders();
   const msg = `📦 <b>All System Orders (${orders.length}):</b>\n━━━━━━━━━━━━━━━━━━━━━━\n${orders.slice(-10).map(o => `• Order <code>#${o.id.slice(0, 8)}</code> | User: <code>${o.userId}</code> | Status: <b>${o.status}</b>`).join('\n') || '<i>No orders</i>'}`;
   await ctx.reply(msg, { parse_mode: 'HTML' });
 });
 
 bot.callbackQuery("ignore", async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
 });
 
 bot.catch((err) => {
