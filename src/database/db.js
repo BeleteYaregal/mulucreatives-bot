@@ -59,8 +59,10 @@ class Database {
 
   // Business Card Methods
   saveBusinessCard(cardData) {
-    const existingIndex = this.data.cards.findIndex(c => c.id === cardData.id);
+    const cardId = cardData.id || `card_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const existingIndex = this.data.cards.findIndex(c => c.id === cardId);
     const card = {
+      id: cardId,
       ...cardData,
       createdAt: cardData.createdAt || new Date().toISOString()
     };
@@ -85,8 +87,10 @@ class Database {
 
   // Order Methods
   createOrder(orderData) {
-    const existingIndex = this.data.orders.findIndex(o => o.id === orderData.id);
+    const orderId = orderData.id || `ord_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const existingIndex = this.data.orders.findIndex(o => o.id === orderId);
     const order = {
+      id: orderId,
       ...orderData,
       createdAt: orderData.createdAt || new Date().toISOString()
     };
@@ -143,3 +147,4 @@ class Database {
 
 const db = new Database();
 module.exports = db;
+module.exports.db = db;
