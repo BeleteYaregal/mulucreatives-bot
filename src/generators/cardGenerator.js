@@ -114,7 +114,8 @@ async function generateCard(data, templateName, colorName) {
     previewBuffer,
     pdfPath,
     frontPath,
-    backPath
+    backPath,
+    previewPath
   };
 }
 
