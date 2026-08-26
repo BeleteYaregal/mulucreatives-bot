@@ -287,7 +287,8 @@ async function cardWizard(conversation, ctx) {
       data.colors = editColorQuery.callbackQuery.data.replace('color_', '');
       await editColorQuery.answerCallbackQuery("Palette updated!").catch(() => {});
     }
-  } catch (err) {
+  }
+} catch (err) {
     console.error('[MuluCreatives] Card Wizard Error:', err);
     await ctx.reply('❌ An error occurred. Please try again with /card or return to /start').catch(() => {});
   }
