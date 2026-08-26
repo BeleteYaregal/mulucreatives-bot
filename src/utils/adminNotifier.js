@@ -3,31 +3,36 @@
  * Sends notifications to the admin when designs are generated
  */
 
+function escapeMarkdown(text) {
+  if (!text) return '';
+  return String(text).replace(/[_*`\[\]]/g, '\\$&');
+}
+
 /**
  * Send a notification to the admin
  * @param {import('grammy').Api} api - The bot API instance
  * @param {string} type - Design type (e.g., 'Business Card', 'Logo')
- * @param {Object} details - Details about the generation
+ * @param {string} details - Details about the generation
  * @param {import('grammy').Context} userCtx - The user context
  * @param {Buffer} [imageBuffer] - Optional image buffer to send as preview
  */
 async function notifyAdmin(api, type, details, userCtx, imageBuffer = null) {
   const adminId = process.env.ADMIN_CHAT_ID;
-  if (!adminId) return; // Skip if no admin configured
+  if (!adminId) return;
 
   const user = userCtx.from;
-  const username = user.username ? `@${user.username}` : 'No username';
-  const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+  const username = user.username ? `@${escapeMarkdown(user.username)}` : 'No username';
+  const fullName = escapeMarkdown([user.first_name, user.last_name].filter(Boolean).join(' '));
   const now = new Date().toLocaleString('en-US', { timeZone: 'Africa/Addis_Ababa' });
 
   const message = `📊 *MuluCreatives — New Design Generated*
 ━━━━━━━━━━━━━━━━━━━━━━
-🎨 *Type:* ${type}
+🎨 *Type:* ${escapeMarkdown(type)}
 👤 *Customer:* ${fullName}
 🔗 *Username:* ${username}
 🆔 *User ID:* \`${user.id}\`
-🕐 *Time:* ${now}
-${details ? `\n📋 *Details:*\n${details}` : ''}
+🕐 *Time:* ${escapeMarkdown(now)}
+${details ? `\n📋 *Details:*\n${escapeMarkdown(details)}` : ''}
 ━━━━━━━━━━━━━━━━━━━━━━`;
 
   try {
@@ -55,8 +60,8 @@ async function notifyAdminNewUser(api, ctx) {
   if (!adminId) return;
 
   const user = ctx.from;
-  const username = user.username ? `@${user.username}` : 'No username';
-  const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+  const username = user.username ? `@${escapeMarkdown(user.username)}` : 'No username';
+  const fullName = escapeMarkdown([user.first_name, user.last_name].filter(Boolean).join(' '));
   const now = new Date().toLocaleString('en-US', { timeZone: 'Africa/Addis_Ababa' });
 
   const message = `👋 *MuluCreatives — New User*
@@ -64,7 +69,7 @@ async function notifyAdminNewUser(api, ctx) {
 👤 *Name:* ${fullName}
 🔗 *Username:* ${username}
 🆔 *User ID:* \`${user.id}\`
-🕐 *Time:* ${now}
+🕐 *Time:* ${escapeMarkdown(now)}
 ━━━━━━━━━━━━━━━━━━━━━━`;
 
   try {
