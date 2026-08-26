@@ -81,7 +81,7 @@ async function photoWizard(conversation, ctx) {
 
   const toolQuery = await conversation.waitForCallbackQuery(/(tool_|back_menu)/);
   const action = toolQuery.callbackQuery.data;
-  await toolQuery.answerCallbackQuery();
+  await toolQuery.answerCallbackQuery().catch(() => {});
 
   if (action === 'back_menu') {
     return ctx.reply("Returning to main menu...");

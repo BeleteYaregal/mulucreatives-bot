@@ -47,7 +47,7 @@ async function cardWizard(conversation, ctx) {
   await ctx.reply("🎨 <b>Choose a Business Card Template Style:</b>", { parse_mode: 'HTML', reply_markup: tplKeyboard });
   const tplQuery = await conversation.waitForCallbackQuery(/tpl_/);
   data.template = tplQuery.callbackQuery.data.replace('tpl_', '');
-  await tplQuery.answerCallbackQuery();
+  await tplQuery.answerCallbackQuery().catch(() => {});
 
   // --- Step 2: Form Collection ---
   await ctx.reply("📝 What is your <b>Full Name</b>? (e.g. Belete Yaregal)", { parse_mode: 'HTML' });
@@ -126,7 +126,7 @@ async function cardWizard(conversation, ctx) {
   await ctx.reply("🎨 Select a Color Palette:", { reply_markup: colorKeyboard });
   const colorQuery = await conversation.waitForCallbackQuery(/color_/);
   data.colors = colorQuery.callbackQuery.data.replace('color_', '');
-  await colorQuery.answerCallbackQuery();
+  await colorQuery.answerCallbackQuery().catch(() => {});
 
   // --- Step 3: Interactive Live Preview Loop ---
   let isEditing = true;
@@ -166,7 +166,7 @@ async function cardWizard(conversation, ctx) {
 
     const actionQuery = await conversation.waitForCallbackQuery(/(edit_|confirm_order|back_menu)/);
     const action = actionQuery.callbackQuery.data;
-    await actionQuery.answerCallbackQuery();
+    await actionQuery.answerCallbackQuery().catch(() => {});
 
     if (action === 'confirm_order') {
       isEditing = false;
@@ -269,12 +269,12 @@ async function cardWizard(conversation, ctx) {
       await ctx.reply("🎨 Choose a Template:", { reply_markup: tplKeyboard });
       const editTplQuery = await conversation.waitForCallbackQuery(/tpl_/);
       data.template = editTplQuery.callbackQuery.data.replace('tpl_', '');
-      await editTplQuery.answerCallbackQuery();
+      await editTplQuery.answerCallbackQuery().catch(() => {});
     } else if (action === 'edit_color') {
       await ctx.reply("🎨 Choose a Color Palette:", { reply_markup: colorKeyboard });
       const editColorQuery = await conversation.waitForCallbackQuery(/color_/);
       data.colors = editColorQuery.callbackQuery.data.replace('color_', '');
-      await editColorQuery.answerCallbackQuery();
+      await editColorQuery.answerCallbackQuery().catch(() => {});
     }
   }
 }

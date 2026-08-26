@@ -5,11 +5,11 @@ const { notifyAdmin } = require('../utils/adminNotifier');
 async function logoWizard(conversation, ctx) {
   const data = {};
 
-  await ctx.reply("🏷️ What's your *brand name*?", { parse_mode: 'Markdown' });
+  await ctx.reply("🏷️ What's your <b>brand name</b>?", { parse_mode: 'HTML' });
   const nameCtx = await conversation.waitFor('message:text');
   data.brandName = nameCtx.message.text;
 
-  await ctx.reply("✏️ Enter a *tagline* (or send /skip)", { parse_mode: 'Markdown' });
+  await ctx.reply("✏️ Enter a <b>tagline</b> (or send /skip)", { parse_mode: 'HTML' });
   const taglineCtx = await conversation.wait();
   if (taglineCtx.message?.text && taglineCtx.message.text !== '/skip') {
     data.tagline = taglineCtx.message.text;
@@ -27,7 +27,7 @@ async function logoWizard(conversation, ctx) {
   await ctx.reply("🎨 Select a color scheme:", { reply_markup: colorKeyboard });
   const colorQuery = await conversation.waitForCallbackQuery(/color_/);
   data.colors = colorQuery.callbackQuery.data.replace('color_', '');
-  await colorQuery.answerCallbackQuery();
+  await colorQuery.answerCallbackQuery().catch(() => {});
 
   const styleKeyboard = new InlineKeyboard()
     .text("🔤 Monogram", "style_monogram")
@@ -39,7 +39,7 @@ async function logoWizard(conversation, ctx) {
   await ctx.reply("🎨 Select logo style:", { reply_markup: styleKeyboard });
   const styleQuery = await conversation.waitForCallbackQuery(/style_/);
   const style = styleQuery.callbackQuery.data.replace('style_', '');
-  await styleQuery.answerCallbackQuery();
+  await styleQuery.answerCallbackQuery().catch(() => {});
 
   if (style === 'icontext') {
     const iconKeyboard = new InlineKeyboard()
@@ -50,25 +50,25 @@ async function logoWizard(conversation, ctx) {
     await ctx.reply("🎯 Select an icon:", { reply_markup: iconKeyboard });
     const iconQuery = await conversation.waitForCallbackQuery(/icon_/);
     data.iconIndex = parseInt(iconQuery.callbackQuery.data.replace('icon_', ''));
-    await iconQuery.answerCallbackQuery();
+    await iconQuery.answerCallbackQuery().catch(() => {});
   } else {
     data.iconIndex = 0;
   }
 
-  await ctx.reply("⏳ Generating your logo...\n_Powered by MuluCreatives_ ✨", { parse_mode: 'Markdown' });
+  await ctx.reply("⏳ Generating your logo...\n<i>Powered by MuluCreatives</i> ✨", { parse_mode: 'HTML' });
 
   try {
     const { standard, transparent, favicon } = await conversation.external(() => generateLogo(data, style));
     
     await ctx.replyWithPhoto(new InputFile(standard, 'MuluCreatives_Logo.png'), {
-      caption: `✨ *Your MuluCreatives Logo — Standard Version*\n\n🏷️ ${data.brandName}${data.tagline ? `\n✏️ "${data.tagline}"` : ''}\n🎨 Style: ${style} | Colors: ${data.colors}\n\n_Made with MuluCreatives_ @MuluCreativesbot`,
-      parse_mode: 'Markdown'
+      caption: `✨ <b>Your MuluCreatives Logo — Standard Version</b>\n\n🏷️ ${data.brandName}${data.tagline ? `\n✏️ "${data.tagline}"` : ''}\n🎨 Style: ${style} | Colors: ${data.colors}\n\n<i>Made with MuluCreatives</i> @MuluCreativesbot`,
+      parse_mode: 'HTML'
     });
     await ctx.replyWithDocument(new InputFile(transparent, 'MuluCreatives_Logo_Transparent.png'), {
       caption: "🔲 Transparent PNG — Use on any background!"
     });
     await ctx.replyWithPhoto(new InputFile(favicon, 'MuluCreatives_Favicon.png'), {
-      caption: "🔷 Favicon (128×128) — For websites & apps"
+      caption: "🔷 Favicon (128×128) — For websites &amp; apps"
     });
 
     const finishKeyboard = new InlineKeyboard()
