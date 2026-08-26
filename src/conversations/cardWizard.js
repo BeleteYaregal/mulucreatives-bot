@@ -48,9 +48,9 @@ async function cardWizard(conversation, ctx) {
     .text("10 | Executive Monogram", "tpl_executiveMonogram");
 
   await ctx.reply("🎨 <b>Select a Professional Design Family:</b>\n\n<i>Each template family has a unique, agency-grade layout &amp; composition.</i>", { parse_mode: 'HTML', reply_markup: tplKeyboard });
-  const tplQuery = await conversation.waitForCallbackQuery(/tpl_/);
+  const tplQuery = await conversation.waitForCallbackQuery(/^tpl_/);
   data.template = tplQuery.callbackQuery.data.replace('tpl_', '');
-  await tplQuery.answerCallbackQuery().catch(() => {});
+  await tplQuery.answerCallbackQuery("Template selected!").catch(() => {});
 
   // --- Step 2: Form Collection ---
   await ctx.reply("📝 What is your <b>Full Name</b>? (e.g. Abel Tesfaye)", { parse_mode: 'HTML' });
@@ -81,7 +81,7 @@ async function cardWizard(conversation, ctx) {
 
   // Email validation
   await ctx.reply("📧 What is your <b>Email Address</b>? (or send /skip)", { parse_mode: 'HTML' });
-  const emailCtx = await conversation.wait();
+  const emailCtx = await conversation.waitFor(['message:text', 'message:photo']);
   if (emailCtx.message?.text && emailCtx.message.text !== '/skip') {
     const res = validateEmail(emailCtx.message.text.trim());
     data.email = res.formatted;
@@ -89,7 +89,7 @@ async function cardWizard(conversation, ctx) {
 
   // Telegram validation
   await ctx.reply("✈️ What is your <b>Telegram Handle</b>? (e.g. @beleteyaregal or /skip)", { parse_mode: 'HTML' });
-  const tgCtx = await conversation.wait();
+  const tgCtx = await conversation.waitFor(['message:text', 'message:photo']);
   if (tgCtx.message?.text && tgCtx.message.text !== '/skip') {
     const res = validateTelegram(tgCtx.message.text.trim());
     data.telegram = res.formatted;
@@ -97,7 +97,7 @@ async function cardWizard(conversation, ctx) {
 
   // Website validation
   await ctx.reply("🌐 What is your <b>Website URL</b>? (e.g. mulucreatives.com or /skip)", { parse_mode: 'HTML' });
-  const webCtx = await conversation.wait();
+  const webCtx = await conversation.waitFor(['message:text', 'message:photo']);
   if (webCtx.message?.text && webCtx.message.text !== '/skip') {
     const res = validateWebsite(webCtx.message.text.trim());
     data.website = res.formatted;
@@ -105,14 +105,14 @@ async function cardWizard(conversation, ctx) {
 
   // Address
   await ctx.reply("📍 What is your <b>City/Address</b>? (e.g. Addis Ababa, Ethiopia or /skip)", { parse_mode: 'HTML' });
-  const locCtx = await conversation.wait();
+  const locCtx = await conversation.waitFor(['message:text', 'message:photo']);
   if (locCtx.message?.text && locCtx.message.text !== '/skip') {
     data.location = locCtx.message.text.trim();
   }
 
   // Logo upload
   await ctx.reply("🏷️ Upload your <b>Company Logo</b> (image or /skip)", { parse_mode: 'HTML' });
-  const logoCtx = await conversation.wait();
+  const logoCtx = await conversation.waitFor(['message:text', 'message:photo']);
   if (logoCtx.message?.photo) {
     const photo = logoCtx.message.photo[logoCtx.message.photo.length - 1];
     data.logoBuffer = await conversation.external(() => downloadFile(ctx, photo.file_id));
@@ -130,16 +130,16 @@ async function cardWizard(conversation, ctx) {
     .text("🧱 Terracotta & Cream", "color_terracotta_cream").row()
     .text("🇪🇹 Ethiopian Modern", "color_ethiopian_modern");
 
-  await ctx.reply("🎨 Select a Color Palette:", { reply_markup: colorKeyboard });
-  const colorQuery = await conversation.waitForCallbackQuery(/color_/);
+  await ctx.reply("🎨 <b>Select a Color Palette:</b>", { parse_mode: 'HTML', reply_markup: colorKeyboard });
+  const colorQuery = await conversation.waitForCallbackQuery(/^color_/);
   data.colors = colorQuery.callbackQuery.data.replace('color_', '');
-  await colorQuery.answerCallbackQuery().catch(() => {});
+  await colorQuery.answerCallbackQuery("Palette selected!").catch(() => {});
 
   // --- Step 3: Interactive Live Preview Loop ---
   let isEditing = true;
 
   while (isEditing) {
-    await ctx.reply("⏳ Rendering live business card preview...", { parse_mode: 'HTML' });
+    await ctx.reply("⏳ <b>Rendering live business card preview...</b>", { parse_mode: 'HTML' });
 
     let cardResult;
     try {
@@ -171,9 +171,9 @@ async function cardWizard(conversation, ctx) {
       reply_markup: editKeyboard
     });
 
-    const actionQuery = await conversation.waitForCallbackQuery(/(edit_|confirm_order|back_menu)/);
+    const actionQuery = await conversation.waitForCallbackQuery(/^(edit_|confirm_order|back_menu)/);
     const action = actionQuery.callbackQuery.data;
-    await actionQuery.answerCallbackQuery().catch(() => {});
+    await actionQuery.answerCallbackQuery("Processing request...").catch(() => {});
 
     if (action === 'confirm_order') {
       isEditing = false;
@@ -274,14 +274,14 @@ async function cardWizard(conversation, ctx) {
       if (res.valid) data.telegram = res.formatted;
     } else if (action === 'edit_template') {
       await ctx.reply("🎨 Select a Professional Design Family:", { reply_markup: tplKeyboard });
-      const editTplQuery = await conversation.waitForCallbackQuery(/tpl_/);
+      const editTplQuery = await conversation.waitForCallbackQuery(/^tpl_/);
       data.template = editTplQuery.callbackQuery.data.replace('tpl_', '');
-      await editTplQuery.answerCallbackQuery().catch(() => {});
+      await editTplQuery.answerCallbackQuery("Template updated!").catch(() => {});
     } else if (action === 'edit_color') {
       await ctx.reply("🎨 Select a Color Palette:", { reply_markup: colorKeyboard });
-      const editColorQuery = await conversation.waitForCallbackQuery(/color_/);
+      const editColorQuery = await conversation.waitForCallbackQuery(/^color_/);
       data.colors = editColorQuery.callbackQuery.data.replace('color_', '');
-      await editColorQuery.answerCallbackQuery().catch(() => {});
+      await editColorQuery.answerCallbackQuery("Palette updated!").catch(() => {});
     }
   }
 }
