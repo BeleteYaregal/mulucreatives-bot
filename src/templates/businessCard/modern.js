@@ -1,4 +1,4 @@
-const { drawRoundedRect, drawCircularImage, fitText, loadImageFromBuffer, drawGradientRect, drawIconBadge, drawPhoneIcon, drawTelegramIcon, drawEmailIcon, drawLocationIcon, drawCheckIcon, drawQRCode } = require('../../utils/image');
+const { drawRoundedRect, loadImageFromBuffer, drawIconBadge, drawPhoneIcon, drawTelegramIcon, drawEmailIcon, drawLocationIcon, drawCheckIcon, drawQRCode } = require('../../utils/image');
 
 module.exports = {
   id: 'modern',
@@ -8,97 +8,155 @@ module.exports = {
     const { side, name, title, company, phone, email, telegram, website, location, tagline, services, logoBuffer, colors } = data;
     const width = canvas.width;
     const height = canvas.height;
-    const primary = colors?.primary || '#0d6efd';
-    const dark = '#1a1a24';
-    const offWhite = '#f8f9fa';
     
+    const primary = colors?.primary || '#0066FF';
+    const secondary = colors?.secondary || '#00B4D8';
+    const darkNavy = '#0F172A';
+    const canvasBg = '#F8FAFC';
+    const textDark = '#1E293B';
+    const textMuted = '#64748B';
+
+    ctx.save();
+
     if (side === 'front') {
-      ctx.fillStyle = offWhite;
+      // 1. Background
+      ctx.fillStyle = canvasBg;
       ctx.fillRect(0, 0, width, height);
 
-      // Chevron ribbon background
+      // 2. Dual Chevron Ribbons
       ctx.fillStyle = primary;
       ctx.beginPath();
-      ctx.moveTo(500, 0);
-      ctx.lineTo(800, 0);
-      ctx.lineTo(600, height);
+      ctx.moveTo(480, 0);
+      ctx.lineTo(760, 0);
+      ctx.lineTo(580, height);
       ctx.lineTo(300, height);
+      ctx.closePath();
       ctx.fill();
 
-      // Right dark section
-      ctx.fillStyle = dark;
+      ctx.fillStyle = secondary;
       ctx.beginPath();
-      ctx.moveTo(800, 0);
+      ctx.moveTo(760, 0);
+      ctx.lineTo(820, 0);
+      ctx.lineTo(640, height);
+      ctx.lineTo(580, height);
+      ctx.closePath();
+      ctx.fill();
+
+      // Right Dark Section
+      ctx.fillStyle = darkNavy;
+      ctx.beginPath();
+      ctx.moveTo(820, 0);
       ctx.lineTo(width, 0);
       ctx.lineTo(width, height);
-      ctx.lineTo(600, height);
+      ctx.lineTo(640, height);
+      ctx.closePath();
       ctx.fill();
 
-      // Front content left
-      ctx.fillStyle = dark;
-      ctx.font = 'bold 60px "Helvetica Neue", Arial';
-      ctx.fillText(name || '', 80, 200);
-      
+      // Top Accent Line
       ctx.fillStyle = primary;
-      ctx.font = '30px "Helvetica Neue", Arial';
-      ctx.fillText((title || '').toUpperCase(), 80, 250);
+      ctx.fillRect(0, 0, 480, 12);
 
+      // 3. Left Content (Logo, Name, Title, Company)
       if (logoBuffer) {
-        const logo = await loadImageFromBuffer(logoBuffer);
-        ctx.drawImage(logo, 80, 60, 80, 80);
+        try {
+          const logo = await loadImageFromBuffer(logoBuffer);
+          ctx.drawImage(logo, 80, 70, 90, 90);
+        } catch (e) {}
       }
 
-      // Front content right
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'right';
-      ctx.font = '22px "Helvetica Neue", Arial';
-      
-      const drawContact = (value, yOffset) => {
-        if (value) {
-          ctx.fillText(value, width - 80, yOffset);
-        }
+      ctx.fillStyle = textDark;
+      ctx.font = 'bold 36px "Arial", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText((company || 'MuluCreatives').toUpperCase(), logoBuffer ? 190 : 80, 110);
+
+      if (tagline) {
+        ctx.fillStyle = textMuted;
+        ctx.font = '20px "Arial", sans-serif';
+        ctx.fillText(tagline, logoBuffer ? 190 : 80, 145);
+      }
+
+      // Name & Title
+      ctx.fillStyle = textDark;
+      ctx.font = 'bold 62px "Arial", sans-serif';
+      ctx.fillText(name || 'Abel Tesfaye', 80, 310);
+
+      ctx.fillStyle = primary;
+      ctx.font = 'bold 26px "Arial", sans-serif';
+      ctx.fillText((title || 'Creative Director').toUpperCase(), 80, 360);
+
+      // 4. Right Content (Contact Information)
+      const rightX = 850;
+      let contactY = 220;
+      const stepY = 70;
+
+      const drawRightContact = (drawIcon, value) => {
+        if (!value) return;
+
+        drawIconBadge(ctx, rightX + 25, contactY - 8, 22, primary, drawIcon || drawPhoneIcon);
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '22px "Arial", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(value, rightX + 65, contactY);
+
+        contactY += stepY;
       };
 
-      drawContact(phone, 200);
-      drawContact(email, 260);
-      drawContact(website, 320);
-      drawContact(location, 380);
+      drawRightContact(drawPhoneIcon, phone);
+      drawRightContact(drawEmailIcon, email);
+      drawRightContact(drawTelegramIcon, telegram);
+      drawRightContact(drawLocationIcon, location);
+      drawRightContact(drawPhoneIcon, website);
 
     } else {
-      // Back side
-      ctx.fillStyle = dark;
+      // --- Back Side ---
+      ctx.fillStyle = darkNavy;
       ctx.fillRect(0, 0, width, height);
-      
+
+      // Bottom Left Chevron Accent
       ctx.fillStyle = primary;
       ctx.beginPath();
-      ctx.moveTo(0, height - 200);
-      ctx.lineTo(300, height);
+      ctx.moveTo(0, height - 220);
+      ctx.lineTo(350, height);
       ctx.lineTo(0, height);
+      ctx.closePath();
       ctx.fill();
 
-      // QR box
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(100, height / 2 - 150, 300, 300);
+      // Vector QR Code Frame
+      const qrSize = 280;
+      const qrX = 100;
+      const qrY = height / 2 - qrSize / 2;
 
-      ctx.fillStyle = '#ffffff';
+      drawQRCode(ctx, telegram || website || `https://t.me/MuluCreativesbot`, qrX, qrY, qrSize, primary, '#FFFFFF');
+
+      // Right Side Branding & Services
+      ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'left';
-      ctx.font = 'bold 50px "Helvetica Neue", Arial';
-      ctx.fillText(company || '', 500, 200);
-      ctx.font = '24px "Helvetica Neue", Arial';
-      ctx.fillText(tagline || '', 500, 250);
+      ctx.font = 'bold 54px "Arial", sans-serif';
+      ctx.fillText(company || 'MuluCreatives', 460, 200);
 
-      // Services checklist
-      if (services && services.length > 0) {
-        let sy = 350;
-        ctx.font = '22px "Helvetica Neue", Arial';
-        services.forEach(srv => {
-          ctx.fillStyle = primary;
-          ctx.fillText('✔', 500, sy);
-          ctx.fillStyle = '#ffffff';
-          ctx.fillText(srv, 540, sy);
-          sy += 40;
-        });
-      }
+      ctx.fillStyle = secondary;
+      ctx.font = '24px "Arial", sans-serif';
+      ctx.fillText(website || 'www.mulucreatives.com', 460, 245);
+
+      // Checked Services List
+      const serviceList = services || [
+        'Graphics Design & Branding',
+        'Print-Ready Business Cards',
+        'Logo & Identity Design',
+        'Social Media Marketing Ads'
+      ];
+
+      let sy = 330;
+      serviceList.slice(0, 4).forEach(srv => {
+        drawCheckIcon(ctx, 480, sy - 8, 16, secondary);
+        ctx.fillStyle = '#F1F5F9';
+        ctx.font = '22px "Arial", sans-serif';
+        ctx.fillText(srv, 515, sy);
+        sy += 50;
+      });
     }
+
+    ctx.restore();
   }
 };
