@@ -1,4 +1,5 @@
 require('dotenv').config();
+const http = require('http');
 const { Bot, InputFile, InlineKeyboard } = require('grammy');
 const { conversations, createConversation } = require('@grammyjs/conversations');
 const { getSessionConfig } = require('./middleware/session');
@@ -12,6 +13,15 @@ const { handleAdminCommand } = require('./bot/handlers/adminHandler');
 
 // 1. Initialize Storage Directories
 initStorage();
+
+// 2. Start HTTP Health Check Server for Render Web Services
+const port = process.env.PORT || 10000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('✨ MuluCreatives Bot is active!\n');
+}).listen(port, () => {
+  console.log(`🌐 Health check server listening on port ${port}`);
+});
 
 const bot = new Bot(process.env.BOT_TOKEN);
 
