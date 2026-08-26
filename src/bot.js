@@ -5,6 +5,7 @@ const { conversations, createConversation } = require('@grammyjs/conversations')
 const { getSessionConfig } = require('./middleware/session');
 const { cardWizard } = require('./conversations/cardWizard');
 const { logoWizard } = require('./conversations/logoWizard');
+const { photoWizard } = require('./conversations/photoWizard');
 const { notifyAdminNewUser } = require('./utils/adminNotifier');
 const { initStorage } = require('./utils/storage');
 const { db } = require('./database/db');
@@ -36,6 +37,7 @@ bot.use(getSessionConfig());
 bot.use(conversations());
 bot.use(createConversation(cardWizard));
 bot.use(createConversation(logoWizard));
+bot.use(createConversation(photoWizard));
 
 const welcomeMsg = `✨ <b>Welcome to MuluCreatives!</b>
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -45,12 +47,13 @@ Create professional, print-ready designs in seconds!
 <b>🛠️ Available Services:</b>
 • 🪪 Business Card (7 Designer Templates + Print-Ready PDF)
 • 🎯 Logo Design (6 Presets + Vector Export)
+• 📸 Photo Editing &amp; Background Removal
 • 📱 Social Media Design  •  📢 Flyers &amp; Posters
 • 🎬 YouTube Thumbnails  •  🖼️ Banners
 • 📄 CV / Resume  •  🎓 Certificates
 • 💌 Invitations  •  🍔 Restaurant Menus
 • 🏢 Company Profiles  •  🏠 Real Estate Ads
-• 📸 Photo Editing  •  🤖 AI Image Design
+• 🤖 AI Image Design
 
 <i>Tap a service below to start:</i> 👇`;
 
@@ -69,6 +72,7 @@ bot.command("help", async (ctx) => {
 /start — Main service menu
 /card — Create a business card (7 styles + PDF)
 /logo — Generate a logo
+/photo — Edit photo / Remove background
 /orders — View my recent orders
 /admin — Admin panel (authorized users)
 /help — Show this message
@@ -84,6 +88,10 @@ bot.command("card", async (ctx) => {
 
 bot.command("logo", async (ctx) => {
   await ctx.conversation.enter("logoWizard");
+});
+
+bot.command("photo", async (ctx) => {
+  await ctx.conversation.enter("photoWizard");
 });
 
 bot.command("orders", async (ctx) => {
@@ -104,6 +112,11 @@ bot.callbackQuery("menu_card", async (ctx) => {
 bot.callbackQuery("menu_logo", async (ctx) => {
   await ctx.answerCallbackQuery();
   await ctx.conversation.enter("logoWizard");
+});
+
+bot.callbackQuery("menu_photo", async (ctx) => {
+  await ctx.answerCallbackQuery();
+  await ctx.conversation.enter("photoWizard");
 });
 
 bot.callbackQuery("menu_orders", async (ctx) => {
@@ -135,7 +148,7 @@ bot.callbackQuery("back_menu", async (ctx) => {
 });
 
 bot.callbackQuery(/menu_.+/, async (ctx) => {
-  if (['menu_card', 'menu_logo', 'menu_orders', 'menu_profile', 'menu_support'].includes(ctx.callbackQuery.data)) return;
+  if (['menu_card', 'menu_logo', 'menu_photo', 'menu_orders', 'menu_profile', 'menu_support'].includes(ctx.callbackQuery.data)) return;
   await ctx.answerCallbackQuery("🚧 Coming soon!");
   await ctx.reply(
     `🚧 <b>Service Coming Soon!</b>\n\nThis graphics service module is currently under development for Ethiopian customers.\nStay tuned for updates! ✨`,

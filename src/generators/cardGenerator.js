@@ -3,6 +3,7 @@ const path = require('path');
 const { createCanvas, loadImage } = require('canvas');
 const pdfService = require('../services/pdfService');
 const schemes = require('../data/colorSchemes');
+const db = require('../database/db');
 
 const templates = {
   corporate: require('../templates/businessCard/corporate'),
@@ -14,16 +15,6 @@ const templates = {
   elegant: require('../templates/businessCard/elegant')
 };
 
-// Database mock/service fallback
-let db;
-try {
-  db = require('../services/dbService');
-} catch (e) {
-  db = {
-    saveCardRecord: async () => {} // Fallback if db is not implemented yet
-  };
-}
-
 /**
  * Generates a business card (front, back, preview, PDF).
  * @param {Object} data - Card data.
@@ -32,35 +23,33 @@ try {
  * @returns {Promise<Object>} - Contains buffers and paths.
  */
 async function generateCard(data, templateName, colorName) {
-  const template = templates[templateName];
-  if (!template) {
-    throw new Error(`Template not found: ${templateName}`);
-  }
-
+  const template = templates[templateName] || templates.modern;
   const colors = schemes[colorName] || schemes.ocean;
   const templateData = { ...data, colors };
 
   const cardWidth = 1400;
   const cardHeight = 800;
 
-  // Front Canvas
+  // 1. Front Canvas
   const frontCanvas = createCanvas(cardWidth, cardHeight);
   const frontCtx = frontCanvas.getContext('2d');
-  
-  // Call template render for front side
   await template.render(frontCanvas, frontCtx, { ...templateData, side: 'front' });
   const frontBuffer = frontCanvas.toBuffer('image/png');
 
-  // Back Canvas (if supported)
+  // 2. Back Canvas (if template has back side)
   let backBuffer = null;
-  if (typeof template.renderBack === 'function') {
-    const backCanvas = createCanvas(cardWidth, cardHeight);
-    const backCtx = backCanvas.getContext('2d');
-    await template.renderBack(backCanvas, backCtx, { ...templateData, side: 'back' });
-    backBuffer = backCanvas.toBuffer('image/png');
+  if (template.hasBack !== false) {
+    try {
+      const backCanvas = createCanvas(cardWidth, cardHeight);
+      const backCtx = backCanvas.getContext('2d');
+      await template.render(backCanvas, backCtx, { ...templateData, side: 'back' });
+      backBuffer = backCanvas.toBuffer('image/png');
+    } catch (e) {
+      console.error("Error rendering back side:", e);
+    }
   }
 
-  // Preview Canvas (Combined with shadows)
+  // 3. Preview Canvas (Combined with shadows)
   const previewCanvas = createCanvas(1500, 1750);
   const previewCtx = previewCanvas.getContext('2d');
   
@@ -92,7 +81,7 @@ async function generateCard(data, templateName, colorName) {
 
   const previewBuffer = previewCanvas.toBuffer('image/png');
 
-  // Paths
+  // Storage Paths
   const timestamp = Date.now();
   const generatedDir = path.resolve(__dirname, '../../storage/generated');
   const pdfDir = path.resolve(__dirname, '../../storage/pdf');
@@ -105,30 +94,18 @@ async function generateCard(data, templateName, colorName) {
   const pdfPath = path.join(pdfDir, `card_${timestamp}.pdf`);
   const previewPath = path.join(generatedDir, `card_preview_${timestamp}.png`);
 
-  // Save files
-  fs.writeFileSync(frontPath, frontBuffer);
-  if (backBuffer) {
-    fs.writeFileSync(backPath, backBuffer);
-  }
-  fs.writeFileSync(previewPath, previewBuffer);
+  // Save files asynchronously
+  try {
+    fs.writeFileSync(frontPath, frontBuffer);
+    if (backBuffer) fs.writeFileSync(backPath, backBuffer);
+    fs.writeFileSync(previewPath, previewBuffer);
 
-  // Generate PDF using pdfService
-  await pdfService.createBusinessCardPDF(frontBuffer, backBuffer, pdfPath, { 
-    title: `${data.name || 'Business'} Card`
-  });
-
-  // Save record to DB
-  if (db.saveCardRecord) {
-    await db.saveCardRecord({
-      data,
-      templateName,
-      colorName,
-      frontPath,
-      backPath,
-      pdfPath,
-      previewPath,
-      createdAt: new Date()
+    // Generate PDF using pdfService
+    await pdfService.createBusinessCardPDF(frontBuffer, backBuffer, pdfPath, { 
+      title: `${data.name || 'Business'} Card`
     });
+  } catch (e) {
+    console.error("Error saving card files or PDF:", e);
   }
 
   return {
@@ -142,5 +119,6 @@ async function generateCard(data, templateName, colorName) {
 }
 
 module.exports = {
-  generateCard
+  generateCard,
+  templates
 };

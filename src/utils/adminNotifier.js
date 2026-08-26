@@ -1,15 +1,15 @@
 /**
  * Admin Notification Utility for MuluCreatives Bot
- * Sends notifications to the admin when designs are generated
+ * Sends notifications to the admin when designs are generated or new users join
  */
 
-function escapeMarkdown(text) {
+function escapeHtml(text) {
   if (!text) return '';
-  return String(text).replace(/[_*`\[\]]/g, '\\$&');
+  return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /**
- * Send a notification to the admin
+ * Send a notification to the admin when a design is created
  * @param {import('grammy').Api} api - The bot API instance
  * @param {string} type - Design type (e.g., 'Business Card', 'Logo')
  * @param {string} details - Details about the generation
@@ -21,18 +21,18 @@ async function notifyAdmin(api, type, details, userCtx, imageBuffer = null) {
   if (!adminId) return;
 
   const user = userCtx.from;
-  const username = user.username ? `@${escapeMarkdown(user.username)}` : 'No username';
-  const fullName = escapeMarkdown([user.first_name, user.last_name].filter(Boolean).join(' '));
+  const username = user.username ? `@${escapeHtml(user.username)}` : 'No username';
+  const fullName = escapeHtml([user.first_name, user.last_name].filter(Boolean).join(' '));
   const now = new Date().toLocaleString('en-US', { timeZone: 'Africa/Addis_Ababa' });
 
-  const message = `📊 *MuluCreatives — New Design Generated*
+  const message = `📊 <b>MuluCreatives — New Design Generated</b>
 ━━━━━━━━━━━━━━━━━━━━━━
-🎨 *Type:* ${escapeMarkdown(type)}
-👤 *Customer:* ${fullName}
-🔗 *Username:* ${username}
-🆔 *User ID:* \`${user.id}\`
-🕐 *Time:* ${escapeMarkdown(now)}
-${details ? `\n📋 *Details:*\n${escapeMarkdown(details)}` : ''}
+🎨 <b>Type:</b> ${escapeHtml(type)}
+👤 <b>Customer:</b> ${fullName}
+🔗 <b>Username:</b> ${username}
+🆔 <b>User ID:</b> <code>${user.id}</code>
+🕐 <b>Time:</b> ${escapeHtml(now)}
+${details ? `\n📋 <b>Details:</b>\n${escapeHtml(details)}` : ''}
 ━━━━━━━━━━━━━━━━━━━━━━`;
 
   try {
@@ -40,10 +40,10 @@ ${details ? `\n📋 *Details:*\n${escapeMarkdown(details)}` : ''}
       const { InputFile } = require('grammy');
       await api.sendPhoto(adminId, new InputFile(imageBuffer, 'preview.png'), {
         caption: message,
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
       });
     } else {
-      await api.sendMessage(adminId, message, { parse_mode: 'Markdown' });
+      await api.sendMessage(adminId, message, { parse_mode: 'HTML' });
     }
   } catch (err) {
     console.error('Failed to notify admin:', err.message);
@@ -60,20 +60,20 @@ async function notifyAdminNewUser(api, ctx) {
   if (!adminId) return;
 
   const user = ctx.from;
-  const username = user.username ? `@${escapeMarkdown(user.username)}` : 'No username';
-  const fullName = escapeMarkdown([user.first_name, user.last_name].filter(Boolean).join(' '));
+  const username = user.username ? `@${escapeHtml(user.username)}` : 'No username';
+  const fullName = escapeHtml([user.first_name, user.last_name].filter(Boolean).join(' '));
   const now = new Date().toLocaleString('en-US', { timeZone: 'Africa/Addis_Ababa' });
 
-  const message = `👋 *MuluCreatives — New User*
+  const message = `🎉 <b>MuluCreatives — New User Joined!</b>
 ━━━━━━━━━━━━━━━━━━━━━━
-👤 *Name:* ${fullName}
-🔗 *Username:* ${username}
-🆔 *User ID:* \`${user.id}\`
-🕐 *Time:* ${escapeMarkdown(now)}
+👤 <b>Name:</b> ${fullName}
+🔗 <b>Username:</b> ${username}
+🆔 <b>User ID:</b> <code>${user.id}</code>
+🕐 <b>Time:</b> ${escapeHtml(now)}
 ━━━━━━━━━━━━━━━━━━━━━━`;
 
   try {
-    await api.sendMessage(adminId, message, { parse_mode: 'Markdown' });
+    await api.sendMessage(adminId, message, { parse_mode: 'HTML' });
   } catch (err) {
     console.error('Failed to notify admin (new user):', err.message);
   }
