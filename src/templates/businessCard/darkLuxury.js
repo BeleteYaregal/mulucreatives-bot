@@ -1,95 +1,95 @@
-const { drawQRCode, fitText } = require('../../utils/image');
+const { FONTS, drawQRCode, loadImageFromBuffer, hexToRgba, fitText } = require('../../utils/image');
 
 module.exports = {
   id: 'darkLuxury',
-  name: '02 — Dark Luxury',
-  category: 'luxury',
+  name: 'Dark Luxury',
+  category: 'Business Card',
   hasBack: true,
+  
   render: async function(canvas, ctx, data) {
-    const { side, name, title, company, phone, email, telegram, website, location, tagline, colors } = data;
+    const { side, name, title, company, phone, email, website, location, logoBuffer, colors } = data;
     const width = canvas.width;
     const height = canvas.height;
     
-    const bg = '#0B0C10';
-    const textIvory = '#F5F5F0';
-    const gold = colors?.secondary || '#D4AF37';
-    const muted = '#8E8E93';
-
-    ctx.save();
+    // Background
+    const bg = colors.bg || '#111111';
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
-
-    // Subtle hairline border
-    ctx.strokeStyle = gold;
+    
+    // Radial gradient overlay
+    const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width/1.5);
+    gradient.addColorStop(0, hexToRgba(colors.secondary || '#D4AF37', 0.15));
+    gradient.addColorStop(1, 'transparent');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    // Gold frame
+    ctx.strokeStyle = colors.secondary || '#D4AF37';
     ctx.lineWidth = 1;
-    ctx.strokeRect(50, 50, width - 100, height - 100);
-
+    ctx.strokeRect(45, 45, width - 90, height - 90);
+    
     if (side === 'front') {
-      const startX = 100;
-
-      // Header: Company
-      ctx.fillStyle = gold;
-      ctx.font = 'bold 32px "Georgia", serif';
-      ctx.textAlign = 'left';
-      ctx.fillText((company || 'MuluCreatives').toUpperCase(), startX, 140);
-
-      if (tagline) {
-        ctx.fillStyle = muted;
-        ctx.font = 'italic 18px "Georgia", serif';
-        ctx.fillText(tagline, startX, 170);
+      // Company
+      if (company) {
+        ctx.fillStyle = colors.secondary || '#D4AF37';
+        ctx.font = `30px ${FONTS.serif}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(company.toUpperCase(), width / 2, 100);
       }
-
-      // Middle: Name & Title (Georgia Serif + Modern Sans Pairing)
-      ctx.fillStyle = textIvory;
-      const nameSize = fitText(ctx, name || 'Abel Tesfaye', 650, 54, 'Georgia');
-      ctx.font = `bold ${nameSize}px "Georgia", serif`;
-      ctx.fillText(name || 'Abel Tesfaye', startX, 350);
-
-      ctx.fillStyle = gold;
-      ctx.font = '22px "Arial", sans-serif';
-      ctx.fillText((title || 'Executive Director').toUpperCase(), startX, 395);
-
-      // Contact details (Style C: Label Prefixes T / E / W)
-      ctx.fillStyle = muted;
-      ctx.font = '18px "Arial", sans-serif';
-      let cy = 480;
-      const stepY = 32;
-
-      if (phone) {
-        ctx.fillStyle = gold;
-        ctx.fillText('T', startX, cy);
-        ctx.fillStyle = textIvory;
-        ctx.fillText(phone, startX + 30, cy);
-        cy += stepY;
+      
+      // Logo
+      if (logoBuffer) {
+        try {
+          const logo = await loadImageFromBuffer(logoBuffer);
+          const logoSize = 60;
+          ctx.drawImage(logo, width - 45 - 40 - logoSize, 45 + 40, logoSize, logoSize);
+        } catch (e) {
+          console.error('Error drawing logo', e);
+        }
       }
-      if (email) {
-        ctx.fillStyle = gold;
-        ctx.fillText('E', startX, cy);
-        ctx.fillStyle = textIvory;
-        ctx.fillText(email, startX + 30, cy);
-        cy += stepY;
-      }
-      if (website || telegram) {
-        ctx.fillStyle = gold;
-        ctx.fillText('W', startX, cy);
-        ctx.fillStyle = textIvory;
-        ctx.fillText(website || telegram, startX + 30, cy);
-      }
-
-    } else {
-      // --- Back Side ---
-      const centerX = width / 2;
-      const centerY = height / 2;
-
-      const qrSize = 220;
-      drawQRCode(ctx, telegram || website || 'https://t.me/MuluCreativesbot', centerX - qrSize / 2, centerY - 100, qrSize, gold, bg);
-
-      ctx.fillStyle = gold;
-      ctx.font = 'bold 36px "Georgia", serif';
+      
+      // Name
+      ctx.fillStyle = '#FFFFF0'; // Ivory
       ctx.textAlign = 'center';
-      ctx.fillText((company || 'MuluCreatives').toUpperCase(), centerX, centerY + 160);
+      ctx.textBaseline = 'middle';
+      const nameSize = fitText(ctx, name || '', 700, 52, FONTS.serif);
+      ctx.font = `bold ${nameSize}px ${FONTS.serif}`;
+      ctx.fillText(name || '', width / 2, 320);
+      
+      // Title
+      ctx.fillStyle = colors.secondary || '#D4AF37';
+      ctx.font = `italic 22px ${FONTS.serif}`;
+      ctx.fillText(title || '', width / 2, 370);
+      
+      // Contact
+      const startY = height - 150;
+      const drawContact = (label, val, x, y) => {
+        if (!val) return;
+        ctx.font = `18px ${FONTS.serif}`;
+        ctx.textAlign = 'right';
+        ctx.fillStyle = colors.secondary || '#D4AF37';
+        ctx.fillText(label, x - 10, y);
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#FFFFF0';
+        ctx.fillText(val, x + 10, y);
+      };
+      
+      drawContact('T ·', phone, width / 2 - 150, startY);
+      drawContact('E ·', email, width / 2 + 150, startY);
+      drawContact('W ·', website, width / 2 - 150, startY + 40);
+      drawContact('L ·', location, width / 2 + 150, startY + 40);
+      
+    } else {
+      // Back
+      drawQRCode(ctx, website || 'https://example.com', width / 2 - 150, height / 2 - 170, 300, colors.secondary || '#D4AF37', bg);
+      
+      if (company) {
+        ctx.fillStyle = colors.secondary || '#D4AF37';
+        ctx.font = `30px ${FONTS.serif}`;
+        ctx.textAlign = 'center';
+        ctx.fillText(company.toUpperCase(), width / 2, height - 120);
+      }
     }
-
-    ctx.restore();
   }
 };

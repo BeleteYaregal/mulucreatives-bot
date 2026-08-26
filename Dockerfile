@@ -1,6 +1,5 @@
 FROM node:20-slim
 
-# Install native dependencies for node-canvas
 RUN apt-get update && apt-get install -y \
     build-essential \
     libcairo2-dev \
@@ -8,7 +7,11 @@ RUN apt-get update && apt-get install -y \
     libpango1.0-dev \
     libgif-dev \
     librsvg2-dev \
-    && rm -rf /var/lib/apt/lists/*
+    fonts-liberation \
+    fonts-dejavu-core \
+    fontconfig \
+    && rm -rf /var/lib/apt/lists/* \
+    && fc-cache -f
 
 WORKDIR /app
 

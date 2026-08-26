@@ -1,82 +1,98 @@
-const { fitText, drawQRCode } = require('../../utils/image');
+const { FONTS, drawQRCode, loadImageFromBuffer, fitText } = require('../../utils/image');
 
 module.exports = {
   id: 'swissMinimal',
-  name: '01 — Swiss Minimal',
-  category: 'minimal',
+  name: 'Swiss Minimal',
+  category: 'Business Card',
   hasBack: true,
+  
   render: async function(canvas, ctx, data) {
-    const { side, name, title, company, phone, email, telegram, website, location, tagline, colors } = data;
+    const { side, name, title, company, phone, email, website, location, logoBuffer, colors } = data;
     const width = canvas.width;
     const height = canvas.height;
     
-    const bg = colors?.bg || '#FBFBFB';
-    const textDark = '#111111';
-    const textMuted = '#666666';
-    const accentRed = colors?.secondary || '#D90429';
-
-    ctx.save();
-    ctx.fillStyle = bg;
+    // Background
+    ctx.fillStyle = colors.bg || '#FAFAFA';
     ctx.fillRect(0, 0, width, height);
-
+    
     if (side === 'front') {
-      // Safe area padding: 80px
-      const startX = 80;
+      // Accent line
+      ctx.fillStyle = colors.secondary;
+      ctx.fillRect(70, 80, 2, height - 160);
       
-      // Top section: Company identity
-      ctx.fillStyle = textDark;
-      ctx.font = 'bold 30px "Arial", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText((company || 'MuluCreatives').toUpperCase(), startX, 120);
-
-      if (tagline) {
-        ctx.fillStyle = textMuted;
-        ctx.font = '18px "Arial", sans-serif';
-        ctx.fillText(tagline, startX, 150);
+      // Company
+      if (company) {
+        ctx.fillStyle = colors.muted;
+        ctx.font = `28px ${FONTS.sans}`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(company.toUpperCase(), 140, 80);
       }
-
-      // Middle section: Name & Title (Proportional & Restrained)
-      ctx.fillStyle = textDark;
-      const nameSize = fitText(ctx, name || 'Abel Tesfaye', 700, 52, 'Arial');
-      ctx.font = `bold ${nameSize}px "Arial", sans-serif`;
-      ctx.fillText(name || 'Abel Tesfaye', startX, 360);
-
-      ctx.fillStyle = accentRed;
-      ctx.font = '22px "Arial", sans-serif';
-      ctx.fillText((title || 'Creative Director').toUpperCase(), startX, 405);
-
-      // Subtle 1px Swiss horizontal hairline dividing rule
-      ctx.strokeStyle = '#E0E0E0';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(startX, 500);
-      ctx.lineTo(width - startX, 500);
-      ctx.stroke();
-
-      // Bottom section: Contact Info (Dot-Separated Bullet Row - Style B)
-      const contactItems = [phone, email, website || telegram, location].filter(Boolean);
-      ctx.fillStyle = textDark;
-      ctx.font = '20px "Arial", sans-serif';
-      ctx.fillText(contactItems.join('   •   '), startX, 570);
-
+      
+      // Name
+      ctx.fillStyle = colors.text;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      const nameSize = fitText(ctx, name || '', 700, 52, FONTS.sans);
+      ctx.font = `bold ${nameSize}px ${FONTS.sans}`;
+      ctx.fillText(name || '', 140, 320);
+      
+      // Title
+      ctx.fillStyle = colors.secondary;
+      ctx.font = `22px ${FONTS.sans}`;
+      ctx.fillText((title || '').toUpperCase(), 140, 370);
+      
+      // Divider
+      ctx.fillStyle = colors.muted;
+      ctx.fillRect(140, 430, 400, 1);
+      
+      // Contact Grid
+      const drawContact = (label, val, x, y) => {
+        if (!val) return;
+        ctx.font = `18px ${FONTS.sans}`;
+        ctx.fillStyle = colors.muted;
+        ctx.fillText(label, x, y);
+        ctx.fillStyle = colors.text;
+        ctx.fillText(val, x + 50, y);
+      };
+      
+      let y1 = 480;
+      let y2 = 530;
+      
+      drawContact('T.', phone, 140, y1);
+      drawContact('E.', email, 440, y1);
+      drawContact('W.', website, 140, y2);
+      drawContact('L.', location, 440, y2);
+      
+      // Logo
+      if (logoBuffer) {
+        try {
+          const logo = await loadImageFromBuffer(logoBuffer);
+          const logoSize = 80;
+          ctx.drawImage(logo, width - 80 - logoSize, 80, logoSize, logoSize);
+        } catch (e) {
+          console.error('Error drawing logo', e);
+        }
+      }
+      
     } else {
-      // --- Back Side ---
-      const centerX = width / 2;
-      const centerY = height / 2;
-
-      ctx.fillStyle = textDark;
-      ctx.font = 'bold 44px "Arial", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText((company || 'MuluCreatives').toUpperCase(), centerX, centerY - 140);
-
-      const qrSize = 240;
-      drawQRCode(ctx, telegram || website || 'https://t.me/MuluCreativesbot', centerX - qrSize / 2, centerY - 80, qrSize, textDark, bg);
-
-      ctx.fillStyle = textMuted;
-      ctx.font = '20px "Arial", sans-serif';
-      ctx.fillText(website || 'www.mulucreatives.com', centerX, centerY + 210);
+      // Back
+      if (company) {
+        ctx.fillStyle = colors.text;
+        ctx.font = `bold 34px ${FONTS.sans}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(company.toUpperCase(), width / 2, height / 2 - 160);
+      }
+      
+      drawQRCode(ctx, website || 'https://example.com', width / 2 - 120, height / 2 - 120, 240, colors.text, colors.bg || '#FAFAFA');
+      
+      if (website) {
+        ctx.fillStyle = colors.muted;
+        ctx.font = `20px ${FONTS.sans}`;
+        ctx.textAlign = 'center';
+        ctx.fillText(website, width / 2, height / 2 + 180);
+      }
     }
-
-    ctx.restore();
   }
 };

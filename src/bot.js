@@ -176,5 +176,7 @@ bot.catch((err) => {
 process.once('SIGINT', () => bot.stop());
 process.once('SIGTERM', () => bot.stop());
 
-bot.start();
-console.log('✨ Commercial MuluCreatives Platform is running! @MuluCreativesbot');
+bot.api.deleteWebhook({ drop_pending_updates: true }).catch(() => {}).then(() => {
+  bot.start({ drop_pending_updates: true });
+  console.log('✨ Commercial MuluCreatives Platform is running! @MuluCreativesbot');
+});

@@ -1,109 +1,95 @@
-const { fitText, drawQRCode } = require('../../utils/image');
+const { FONTS, drawQRCode, loadImageFromBuffer, fitText } = require('../../utils/image');
 
 module.exports = {
   id: 'modernCorporate',
-  name: '03 — Modern Corporate',
-  category: 'corporate',
+  name: 'Modern Corporate',
+  category: 'Business Card',
   hasBack: true,
+  
   render: async function(canvas, ctx, data) {
-    const { side, name, title, company, phone, email, telegram, website, location, tagline, colors } = data;
+    const { side, name, title, company, phone, email, website, location, logoBuffer, colors } = data;
     const width = canvas.width;
     const height = canvas.height;
     
-    const bg = '#FFFFFF';
-    const textDark = '#0F172A';
-    const primary = colors?.primary || '#0A192F';
-    const accent = colors?.secondary || '#0284C7';
-    const muted = '#64748B';
-
-    ctx.save();
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, width, height);
-
     if (side === 'front') {
-      const startX = 90;
-
-      // Small brand accent line (Left border indicator)
-      ctx.fillStyle = accent;
-      ctx.fillRect(startX, 100, 4, 60);
-
-      // Company Identity
-      ctx.fillStyle = primary;
-      ctx.font = 'bold 32px "Arial", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText((company || 'MuluCreatives').toUpperCase(), startX + 25, 135);
-
-      if (tagline) {
-        ctx.fillStyle = muted;
-        ctx.font = '18px "Arial", sans-serif';
-        ctx.fillText(tagline, startX + 25, 162);
-      }
-
-      // Name & Title
-      ctx.fillStyle = textDark;
-      const nameSize = fitText(ctx, name || 'Abel Tesfaye', 650, 52, 'Arial');
-      ctx.font = `bold ${nameSize}px "Arial", sans-serif`;
-      ctx.fillText(name || 'Abel Tesfaye', startX, 330);
-
-      ctx.fillStyle = accent;
-      ctx.font = 'bold 22px "Arial", sans-serif';
-      ctx.fillText((title || 'Senior Creative Director').toUpperCase(), startX, 375);
-
-      // Structured Contact Section (Two-Column Layout - Style E)
-      ctx.fillStyle = textDark;
-      ctx.font = '20px "Arial", sans-serif';
-
-      const col1X = startX;
-      const col2X = 650;
-      let y = 470;
-
-      if (phone) {
-        ctx.fillStyle = muted;
-        ctx.fillText('Phone:', col1X, y);
-        ctx.fillStyle = textDark;
-        ctx.fillText(phone, col1X + 80, y);
-      }
-
-      if (email) {
-        ctx.fillStyle = muted;
-        ctx.fillText('Email:', col2X, y);
-        ctx.fillStyle = textDark;
-        ctx.fillText(email, col2X + 80, y);
-      }
-
-      y += 45;
-
-      if (website || telegram) {
-        ctx.fillStyle = muted;
-        ctx.fillText('Web:', col1X, y);
-        ctx.fillStyle = textDark;
-        ctx.fillText(website || telegram, col1X + 80, y);
-      }
-
-      if (location) {
-        ctx.fillStyle = muted;
-        ctx.fillText('Office:', col2X, y);
-        ctx.fillStyle = textDark;
-        ctx.fillText(location, col2X + 80, y);
-      }
-
-    } else {
-      // --- Back Side ---
-      const centerX = width / 2;
-      const centerY = height / 2;
-
-      ctx.fillStyle = primary;
-      ctx.fillRect(0, 0, width, height);
-
-      const qrSize = 220;
-      drawQRCode(ctx, telegram || website || 'https://t.me/MuluCreativesbot', centerX - qrSize / 2, centerY - 90, qrSize, accent, '#FFFFFF');
-
+      // Background
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 36px "Arial", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText((company || 'MuluCreatives').toUpperCase(), centerX, centerY + 170);
+      ctx.fillRect(0, 0, width, height);
+      
+      // Left side panel
+      ctx.fillStyle = colors.bg || '#1E293B';
+      ctx.fillRect(0, 0, 100, height);
+      
+      // Thin accent line
+      ctx.fillStyle = colors.secondary;
+      ctx.fillRect(100, 0, 4, height);
+      
+      // Logo in panel
+      if (logoBuffer) {
+        try {
+          const logo = await loadImageFromBuffer(logoBuffer);
+          const logoSize = 60;
+          ctx.drawImage(logo, 20, 80, logoSize, logoSize);
+        } catch (e) {
+          console.error('Error drawing logo', e);
+        }
+      }
+      
+      // Company
+      if (company) {
+        ctx.fillStyle = colors.primary || '#3B82F6';
+        ctx.fillRect(140, 80, 4, 30);
+        ctx.fillStyle = colors.text;
+        ctx.font = `bold 30px ${FONTS.sans}`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(company, 160, 80);
+      }
+      
+      // Name
+      ctx.fillStyle = colors.text;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      const nameSize = fitText(ctx, name || '', 700, 50, FONTS.sans);
+      ctx.font = `bold ${nameSize}px ${FONTS.sans}`;
+      ctx.fillText(name || '', 140, 320);
+      
+      // Title
+      ctx.fillStyle = colors.secondary;
+      ctx.font = `22px ${FONTS.sans}`;
+      ctx.fillText((title || '').toUpperCase(), 140, 360);
+      
+      // Contact
+      const drawContact = (label, val, x, y) => {
+        if (!val) return;
+        ctx.font = `bold 18px ${FONTS.sans}`;
+        ctx.fillStyle = colors.muted;
+        ctx.fillText(label, x, y);
+        ctx.font = `18px ${FONTS.sans}`;
+        ctx.fillStyle = colors.text;
+        ctx.fillText(val, x + 70, y);
+      };
+      
+      let startY = 500;
+      drawContact('Phone:', phone, 140, startY);
+      drawContact('Email:', email, 540, startY);
+      drawContact('Web:', website, 140, startY + 40);
+      drawContact('Office:', location, 540, startY + 40);
+      
+    } else {
+      // Back
+      ctx.fillStyle = colors.secondary;
+      ctx.fillRect(0, 0, width, height);
+      
+      drawQRCode(ctx, website || 'https://example.com', width / 2 - 120, height / 2 - 140, 240, colors.secondary, '#FFFFFF');
+      
+      if (company) {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = `bold 34px ${FONTS.sans}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(company, width / 2, height / 2 + 150);
+      }
     }
-
-    ctx.restore();
   }
 };

@@ -1,113 +1,99 @@
-const { fitText, drawQRCode } = require('../../utils/image');
+const { FONTS, drawQRCode, loadImageFromBuffer, fitText } = require('../../utils/image');
 
 module.exports = {
   id: 'technology',
-  name: '05 — Technology',
-  category: 'technology',
+  name: 'Technology',
+  category: 'Business Card',
   hasBack: true,
+  
   render: async function(canvas, ctx, data) {
-    const { side, name, title, company, phone, email, telegram, website, location, tagline, colors } = data;
+    const { side, name, title, company, phone, email, website, location, logoBuffer, colors } = data;
     const width = canvas.width;
     const height = canvas.height;
     
-    const bg = '#0F172A'; // Dark Slate Neutral
-    const textWhite = '#F8FAFC';
-    const cyan = colors?.secondary || '#06B6D4';
-    const gridLine = '#1E293B';
-    const muted = '#94A3B8';
-
-    ctx.save();
+    // Background
+    const bg = colors.bg || '#0F172A';
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
-
-    // Precise Technical Grid Background Lines
-    ctx.strokeStyle = gridLine;
-    ctx.lineWidth = 1;
-    const gridStep = 100;
-    for (let gx = 0; gx < width; gx += gridStep) {
-      ctx.beginPath();
-      ctx.moveTo(gx, 0);
-      ctx.lineTo(gx, height);
-      ctx.stroke();
+    
+    // Dot grid
+    ctx.fillStyle = '#1E293B';
+    for (let x = 30; x < width; x += 60) {
+      for (let y = 30; y < height; y += 60) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
-    for (let gy = 0; gy < height; gy += gridStep) {
-      ctx.beginPath();
-      ctx.moveTo(0, gy);
-      ctx.lineTo(width, gy);
-      ctx.stroke();
-    }
-
+    
+    const cyan = colors.secondary || '#06B6D4';
+    const white = '#FFFFFF';
+    
     if (side === 'front') {
-      const startX = 100;
-
-      // Small Geometric Brand Element & Technical Line
+      // Top left accent
       ctx.fillStyle = cyan;
-      ctx.fillRect(startX, 90, 16, 16);
-
-      ctx.strokeStyle = cyan;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(startX + 30, 98);
-      ctx.lineTo(startX + 200, 98);
-      ctx.stroke();
-
-      // Company Identity
-      ctx.fillStyle = textWhite;
-      ctx.font = 'bold 30px "Courier New", monospace';
+      ctx.fillRect(80, 80, 12, 12);
+      ctx.fillRect(100, 85, 100, 2);
+      
+      // Company
+      if (company) {
+        ctx.fillStyle = white;
+        ctx.font = `28px ${FONTS.mono}`;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        ctx.fillText(company, width - 80, 80);
+      }
+      
+      // Name
+      ctx.fillStyle = white;
       ctx.textAlign = 'left';
-      ctx.fillText((company || 'MuluCreatives').toUpperCase(), startX + 220, 106);
-
-      // Name & Title
-      ctx.fillStyle = textWhite;
-      const nameSize = fitText(ctx, name || 'Abel Tesfaye', 650, 54, 'Arial');
-      ctx.font = `bold ${nameSize}px "Arial", sans-serif`;
-      ctx.fillText(name || 'Abel Tesfaye', startX, 300);
-
+      ctx.textBaseline = 'middle';
+      const nameSize = fitText(ctx, name || '', 700, 52, FONTS.sans);
+      ctx.font = `bold ${nameSize}px ${FONTS.sans}`;
+      ctx.fillText(name || '', 80, 300);
+      
+      // Title
       ctx.fillStyle = cyan;
-      ctx.font = 'bold 22px "Courier New", monospace';
-      ctx.fillText(`// ${(title || 'Systems Architect').toUpperCase()}`, startX, 350);
-
-      // Technical Monospaced Contact Block (Style C)
-      ctx.fillStyle = muted;
-      ctx.font = '18px "Courier New", monospace';
-      let cy = 470;
-      const stepY = 32;
-
-      if (phone) {
+      ctx.font = `20px ${FONTS.mono}`;
+      ctx.fillText(`// ${title || ''}`, 80, 350);
+      
+      // Contact block
+      const startY = 480;
+      const drawContact = (label, val, x, y) => {
+        if (!val) return;
+        ctx.font = `18px ${FONTS.mono}`;
         ctx.fillStyle = cyan;
-        ctx.fillText('TEL:', startX, cy);
-        ctx.fillStyle = textWhite;
-        ctx.fillText(phone, startX + 60, cy);
-        cy += stepY;
+        ctx.fillText(label, x, y);
+        ctx.fillStyle = white;
+        ctx.fillText(val, x + 60, y);
+      };
+      
+      drawContact('TEL:', phone, 80, startY);
+      drawContact('EML:', email, 400, startY);
+      drawContact('URL:', website, 80, startY + 40);
+      drawContact('LOC:', location, 400, startY + 40);
+      
+      // Logo
+      if (logoBuffer) {
+        try {
+          const logo = await loadImageFromBuffer(logoBuffer);
+          const logoSize = 60;
+          ctx.drawImage(logo, width - 80 - logoSize, height - 80 - logoSize, logoSize, logoSize);
+        } catch (e) {
+          console.error('Error drawing logo', e);
+        }
       }
-      if (email) {
-        ctx.fillStyle = cyan;
-        ctx.fillText('EML:', startX, cy);
-        ctx.fillStyle = textWhite;
-        ctx.fillText(email, startX + 60, cy);
-        cy += stepY;
-      }
-      if (website || telegram) {
-        ctx.fillStyle = cyan;
-        ctx.fillText('URL:', startX, cy);
-        ctx.fillStyle = textWhite;
-        ctx.fillText(website || telegram, startX + 60, cy);
-      }
-
+      
     } else {
-      // --- Back Side ---
-      const centerX = width / 2;
-      const centerY = height / 2;
-
-      const qrSize = 220;
-      drawQRCode(ctx, telegram || website || 'https://t.me/MuluCreativesbot', centerX - qrSize / 2, centerY - 90, qrSize, cyan, bg);
-
-      ctx.fillStyle = cyan;
-      ctx.font = 'bold 32px "Courier New", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(`// ${(company || 'MuluCreatives').toUpperCase()}`, centerX, centerY + 170);
+      // Back
+      drawQRCode(ctx, website || 'https://example.com', width / 2 - 120, height / 2 - 140, 240, cyan, bg);
+      
+      if (company) {
+        ctx.fillStyle = white;
+        ctx.font = `24px ${FONTS.mono}`;
+        ctx.textAlign = 'center';
+        ctx.fillText(`// ${company}`, width / 2, height / 2 + 150);
+      }
     }
-
-    ctx.restore();
   }
 };

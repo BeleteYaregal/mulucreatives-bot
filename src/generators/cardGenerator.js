@@ -5,6 +5,7 @@ const pdfService = require('../services/pdfService');
 const schemes = require('../data/colorSchemes');
 const db = require('../database/db');
 const { validateCardQuality } = require('../utils/qualityControl');
+const { FONTS } = require('../utils/image');
 
 const templates = {
   swissMinimal: require('../templates/businessCard/swissMinimal'),
@@ -35,6 +36,7 @@ const templates = {
 async function generateCard(data, templateName = 'swissMinimal', colorName = 'obsidian_ivory') {
   const template = templates[templateName] || templates.swissMinimal;
   const colors = schemes[colorName] || schemes.obsidian_ivory;
+  // Ensure logoBuffer is properly passed down in templateData
   const templateData = { ...data, colors };
 
   const cardWidth = 1400;
@@ -66,18 +68,42 @@ async function generateCard(data, templateName = 'swissMinimal', colorName = 'ob
   const previewCanvas = createCanvas(1500, 1750);
   const previewCtx = previewCanvas.getContext('2d');
   
-  previewCtx.fillStyle = '#F0F2F5';
+  // Subtle gradient background
+  const bgGrad = previewCtx.createLinearGradient(0, 0, 0, 1750);
+  bgGrad.addColorStop(0, '#E8ECF1');
+  bgGrad.addColorStop(1, '#D1D8E0');
+  previewCtx.fillStyle = bgGrad;
   previewCtx.fillRect(0, 0, 1500, 1750);
 
   const drawShadowAndCard = async (imgBuffer, x, y, width, height) => {
     const img = await loadImage(imgBuffer);
     previewCtx.save();
     
+    // Draw shadow
     previewCtx.shadowColor = 'rgba(0, 0, 0, 0.25)';
     previewCtx.shadowBlur = 40;
     previewCtx.shadowOffsetX = 0;
     previewCtx.shadowOffsetY = 20;
     
+    // Draw rounded rect path and clip
+    previewCtx.beginPath();
+    const radius = 24;
+    previewCtx.moveTo(x + radius, y);
+    previewCtx.lineTo(x + width - radius, y);
+    previewCtx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    previewCtx.lineTo(x + width, y + height - radius);
+    previewCtx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    previewCtx.lineTo(x + radius, y + height);
+    previewCtx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    previewCtx.lineTo(x, y + radius);
+    previewCtx.quadraticCurveTo(x, y, x + radius, y);
+    previewCtx.closePath();
+    
+    // Fill slightly white before drawing image to handle transparency if any
+    previewCtx.fillStyle = '#FFFFFF';
+    previewCtx.fill();
+    
+    previewCtx.clip();
     previewCtx.drawImage(img, x, y, width, height);
     previewCtx.restore();
   };
@@ -87,6 +113,14 @@ async function generateCard(data, templateName = 'swissMinimal', colorName = 'ob
   if (backBuffer) {
     await drawShadowAndCard(backBuffer, 50, 900, 1400, 800);
   }
+
+  // Add branding watermark text at the bottom
+  previewCtx.fillStyle = '#8E9AA8'; // muted gray
+  const fallbackFont = '"Liberation Sans", "DejaVu Sans", sans-serif';
+  const watermarkFont = (FONTS && FONTS.sans) ? FONTS.sans : fallbackFont;
+  previewCtx.font = `20px ${watermarkFont}`;
+  previewCtx.textAlign = 'center';
+  previewCtx.fillText('✨ MuluCreatives — Professional Design Studio', 750, 1735);
 
   const previewBuffer = previewCanvas.toBuffer('image/png');
 

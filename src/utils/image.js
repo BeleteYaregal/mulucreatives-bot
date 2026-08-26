@@ -1,5 +1,11 @@
 const { createCanvas, loadImage } = require('canvas');
 
+const FONTS = {
+  sans: '"Liberation Sans", "DejaVu Sans", sans-serif',
+  serif: '"Liberation Serif", "DejaVu Serif", serif',
+  mono: '"Liberation Mono", "DejaVu Sans Mono", monospace'
+};
+
 function drawRoundedRect(ctx, x, y, width, height, radius) {
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
@@ -32,10 +38,10 @@ async function drawCircularImage(ctx, imageBuffer, x, y, radius) {
 
 function fitText(ctx, text, maxWidth, initialFontSize, fontFamily) {
   let fontSize = initialFontSize;
-  ctx.font = `${fontSize}px "${fontFamily}"`;
+  ctx.font = `bold ${fontSize}px ${fontFamily}`;
   while (ctx.measureText(text).width > maxWidth && fontSize > 10) {
     fontSize -= 1;
-    ctx.font = `${fontSize}px "${fontFamily}"`;
+    ctx.font = `bold ${fontSize}px ${fontFamily}`;
   }
   return fontSize;
 }
@@ -199,7 +205,7 @@ function drawMonogram(ctx, text, x, y, size, color = '#D4AF37') {
   ctx.stroke();
 
   ctx.fillStyle = color;
-  ctx.font = `bold ${Math.floor(size * 0.45)}px "Georgia", serif`;
+  ctx.font = `bold ${Math.floor(size * 0.45)}px ${FONTS.serif}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(initials, x + size / 2, y + size / 2);
@@ -274,7 +280,25 @@ function drawQRCode(ctx, text, x, y, size, primaryColor = '#0D1B2A', bgColor = '
   ctx.restore();
 }
 
+function drawContactLine(ctx, icon, value, x, y, iconColor, textColor) {
+  if (!value) return;
+  
+  ctx.save();
+  // Icon
+  ctx.fillStyle = iconColor;
+  ctx.font = `19px ${FONTS.sans}`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(icon, x, y);
+  
+  // Text
+  ctx.fillStyle = textColor;
+  ctx.fillText(value, x + 30, y);
+  ctx.restore();
+}
+
 module.exports = {
+  FONTS,
   drawRoundedRect,
   drawCircularImage,
   fitText,
@@ -290,5 +314,6 @@ module.exports = {
   drawCheckIcon,
   drawEthiopianMotif,
   drawMonogram,
-  drawQRCode
+  drawQRCode,
+  drawContactLine
 };

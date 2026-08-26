@@ -1,4 +1,12 @@
-const { fitText, drawQRCode, drawEthiopianMotif } = require('../../utils/image');
+const { fitText, drawQRCode, drawEthiopianMotif, loadImageFromBuffer, FONTS } = require('../../utils/image');
+
+const defaultFonts = {
+  sans: '"Liberation Sans", "DejaVu Sans", sans-serif',
+  serif: '"Liberation Serif", "DejaVu Serif", serif',
+  mono: '"Liberation Mono", "DejaVu Sans Mono", monospace'
+};
+const fontSerif = (FONTS && FONTS.serif) ? FONTS.serif : defaultFonts.serif;
+const fontSans = (FONTS && FONTS.sans) ? FONTS.sans : defaultFonts.sans;
 
 module.exports = {
   id: 'ethiopianModern',
@@ -6,102 +14,88 @@ module.exports = {
   category: 'ethiopian',
   hasBack: true,
   render: async function(canvas, ctx, data) {
-    const { side, name, title, company, phone, email, telegram, website, location, tagline, colors } = data;
+    const { side, name, title, company, phone, email, telegram, website, location, logoBuffer, colors } = data;
     const width = canvas.width;
     const height = canvas.height;
     
-    const bg = '#121016'; // Deep Ethiopian Espresso / Indigo
-    const gold = colors?.secondary || '#D4A017'; // Ethiopian Gold Accent
-    const ocher = '#C86428'; // Warm Terrazzo/Ocher Accent
+    const bg = colors?.bg || '#121016';
+    const gold = colors?.secondary || '#D4A017';
+    const ocher = colors?.accent || '#C86428';
     const textWhite = '#FAF8F5';
-    const muted = '#A59DAB';
 
     ctx.save();
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
 
-    // Contemporary Ethiopian Geometric Motif Accent Line at Top & Bottom
     drawEthiopianMotif(ctx, 80, 50, width - 160, gold);
     drawEthiopianMotif(ctx, 80, height - 50, width - 160, gold);
 
     if (side === 'front') {
-      const startX = 100;
+      const startX = 80;
 
-      // Company Identity
-      ctx.fillStyle = gold;
-      ctx.font = 'bold 34px "Georgia", serif';
-      ctx.textAlign = 'left';
-      ctx.fillText((company || 'MuluCreatives').toUpperCase(), startX, 135);
-
-      if (tagline) {
-        ctx.fillStyle = muted;
-        ctx.font = 'italic 18px "Georgia", serif';
-        ctx.fillText(tagline, startX, 168);
+      if (logoBuffer) {
+        try {
+          const logo = await loadImageFromBuffer(logoBuffer);
+          ctx.drawImage(logo, startX, 90, 80, 80);
+        } catch (e) {
+          ctx.fillStyle = gold;
+          ctx.font = `bold 32px ${fontSerif}`;
+          ctx.fillText((company || 'MuluCreatives').toUpperCase(), startX, 130);
+        }
+      } else {
+        ctx.fillStyle = gold;
+        ctx.font = `bold 32px ${fontSerif}`;
+        ctx.fillText((company || 'MuluCreatives').toUpperCase(), startX, 130);
       }
 
-      // Name & Title
       ctx.fillStyle = textWhite;
-      const nameSize = fitText(ctx, name || 'Belete Yaregal', 650, 54, 'Georgia');
-      ctx.font = `bold ${nameSize}px "Georgia", serif`;
-      ctx.fillText(name || 'Belete Yaregal', startX, 320);
+      const nameSize = fitText(ctx, name || 'Belete Yaregal', 700, 52, fontSerif.split(',')[0].replace(/"/g, ''));
+      ctx.font = `bold ${Math.min(nameSize, 56)}px ${fontSerif}`;
+      ctx.fillText(name || 'Belete Yaregal', startX, 330);
 
       ctx.fillStyle = ocher;
-      ctx.font = 'bold 22px "Arial", sans-serif';
-      ctx.fillText((title || 'Lead Architect & Designer').toUpperCase(), startX, 365);
+      ctx.font = `22px ${fontSans}`;
+      ctx.fillText((title || 'Lead Architect & Designer').toUpperCase(), startX, 375);
 
-      // Contact Details (Style D: Minimalist Line Divider)
-      ctx.strokeStyle = '#2B2633';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(startX, 430);
-      ctx.lineTo(width - startX, 430);
-      ctx.stroke();
-
-      ctx.fillStyle = textWhite;
-      ctx.font = '20px "Arial", sans-serif';
-      let cy = 485;
-      const stepY = 36;
-
+      const cy1 = 480;
+      const cy2 = 530;
+      
+      ctx.font = `19px ${fontSans}`;
+      
       if (phone) {
         ctx.fillStyle = gold;
-        ctx.fillText('📞', startX, cy);
+        ctx.fillText('📞', startX, cy1);
         ctx.fillStyle = textWhite;
-        ctx.fillText(phone, startX + 35, cy);
+        ctx.fillText(phone, startX + 35, cy1);
       }
-
       if (email) {
         ctx.fillStyle = gold;
-        ctx.fillText('📧', startX + 350, cy);
+        ctx.fillText('📧', startX + 350, cy1);
         ctx.fillStyle = textWhite;
-        ctx.fillText(email, startX + 385, cy);
+        ctx.fillText(email, startX + 385, cy1);
       }
-
-      cy += stepY;
-
       if (website || telegram) {
         ctx.fillStyle = gold;
-        ctx.fillText('🌐', startX, cy);
+        ctx.fillText('🌐', startX, cy2);
         ctx.fillStyle = textWhite;
-        ctx.fillText(website || telegram, startX + 35, cy);
+        ctx.fillText(website || telegram, startX + 35, cy2);
       }
-
       if (location) {
         ctx.fillStyle = gold;
-        ctx.fillText('📍', startX + 350, cy);
+        ctx.fillText('📍', startX + 350, cy2);
         ctx.fillStyle = textWhite;
-        ctx.fillText(location, startX + 385, cy);
+        ctx.fillText(location, startX + 385, cy2);
       }
 
     } else {
-      // --- Back Side ---
       const centerX = width / 2;
       const centerY = height / 2;
 
       const qrSize = 220;
-      drawQRCode(ctx, telegram || website || 'https://t.me/MuluCreativesbot', centerX - qrSize / 2, centerY - 90, qrSize, gold, bg);
+      drawQRCode(ctx, telegram || website || 'https://t.me/MuluCreativesbot', centerX - qrSize / 2, centerY - 100, qrSize, gold, bg);
 
       ctx.fillStyle = gold;
-      ctx.font = 'bold 38px "Georgia", serif';
+      ctx.font = `bold 34px ${fontSerif}`;
       ctx.textAlign = 'center';
       ctx.fillText((company || 'MuluCreatives').toUpperCase(), centerX, centerY + 170);
     }

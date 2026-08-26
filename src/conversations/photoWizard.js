@@ -62,34 +62,34 @@ async function resizeForPlatform(inputBuffer, width, height) {
 }
 
 async function photoWizard(conversation, ctx) {
-  await ctx.reply("📸 <b>Upload the photo or image you want to edit:</b>", { parse_mode: 'HTML' });
-
-  const photoCtx = await conversation.waitFor('message:photo');
-  const photo = photoCtx.message.photo[photoCtx.message.photo.length - 1];
-
-  await ctx.reply("⏳ Downloading your image...", { parse_mode: 'HTML' });
-  const inputBuffer = await conversation.external(() => downloadFile(ctx, photo.file_id));
-
-  const toolKeyboard = new InlineKeyboard()
-    .text("✂️ Remove Background (Transparent PNG)", "tool_bg_remove").row()
-    .text("📐 Resize for Instagram Post (1080×1080)", "tool_ig_post").row()
-    .text("📱 Resize for Instagram Story (1080×1920)", "tool_ig_story").row()
-    .text("📘 Resize for Facebook Cover (1200×630)", "tool_fb_cover").row()
-    .text("🏠 Main Menu", "back_menu");
-
-  await ctx.reply("✨ <b>Select a Photo Editing Tool:</b>", { parse_mode: 'HTML', reply_markup: toolKeyboard });
-
-  const toolQuery = await conversation.waitForCallbackQuery(/(tool_|back_menu)/);
-  const action = toolQuery.callbackQuery.data;
-  await toolQuery.answerCallbackQuery().catch(() => {});
-
-  if (action === 'back_menu') {
-    return ctx.reply("Returning to main menu...");
-  }
-
-  await ctx.reply("⏳ Processing image with high quality...", { parse_mode: 'HTML' });
-
   try {
+    await ctx.reply("📸 <b>Upload the photo or image you want to edit:</b>", { parse_mode: 'HTML' });
+
+    const photoCtx = await conversation.waitFor('message:photo');
+    const photo = photoCtx.message.photo[photoCtx.message.photo.length - 1];
+
+    await ctx.reply("⏳ Downloading your image...", { parse_mode: 'HTML' });
+    const inputBuffer = await conversation.external(() => downloadFile(ctx, photo.file_id));
+
+    const toolKeyboard = new InlineKeyboard()
+      .text("✂️ Remove Background (Transparent PNG)", "tool_bg_remove").row()
+      .text("📐 Resize for Instagram Post (1080×1080)", "tool_ig_post").row()
+      .text("📱 Resize for Instagram Story (1080×1920)", "tool_ig_story").row()
+      .text("📘 Resize for Facebook Cover (1200×630)", "tool_fb_cover").row()
+      .text("🏠 Main Menu", "back_menu");
+
+    await ctx.reply("✨ <b>Select a Photo Editing Tool:</b>", { parse_mode: 'HTML', reply_markup: toolKeyboard });
+
+    const toolQuery = await conversation.waitForCallbackQuery(/^(tool_|back_menu)/);
+    const action = toolQuery.callbackQuery.data;
+    await toolQuery.answerCallbackQuery().catch(() => {});
+
+    if (action === 'back_menu') {
+      return ctx.reply("Returning to main menu...");
+    }
+
+    await ctx.reply("⏳ Processing image with high quality...", { parse_mode: 'HTML' });
+
     let resultBuffer;
     let filename = 'edited_image.png';
 
@@ -134,7 +134,7 @@ async function photoWizard(conversation, ctx) {
 
   } catch (error) {
     console.error("Photo processing error:", error);
-    await ctx.reply("❌ Error processing photo. Please try uploading a clearer image.");
+    await ctx.reply("❌ Error processing photo. Please try uploading a clearer image or return to /start.");
   }
 }
 

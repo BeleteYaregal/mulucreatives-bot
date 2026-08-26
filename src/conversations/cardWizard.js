@@ -17,8 +17,9 @@ function escapeHtml(text) {
 }
 
 async function cardWizard(conversation, ctx) {
-  const user = ctx.from;
-  db.saveUser({ id: user.id, firstName: user.first_name, lastName: user.last_name, username: user.username });
+  try {
+    const user = ctx.from;
+    db.saveUser({ id: user.id, firstName: user.first_name, lastName: user.last_name, username: user.username });
 
   const data = {
     name: '',
@@ -214,12 +215,14 @@ async function cardWizard(conversation, ctx) {
 
       // Send High-Res PNG Documents
       await ctx.replyWithDocument(new InputFile(cardResult.frontBuffer, `${data.name.replace(/\s+/g, '_')}_Front_300DPI.png`), {
-        caption: `📄 <b>Front Side</b> (300 DPI High-Resolution PNG)`
+        caption: `📄 <b>Front Side</b> (300 DPI High-Resolution PNG)`,
+        parse_mode: 'HTML'
       });
 
       if (cardResult.backBuffer) {
         await ctx.replyWithDocument(new InputFile(cardResult.backBuffer, `${data.name.replace(/\s+/g, '_')}_Back_300DPI.png`), {
-          caption: `📄 <b>Back Side</b> (300 DPI High-Resolution Vector PNG)`
+          caption: `📄 <b>Back Side</b> (300 DPI High-Resolution Vector PNG)`,
+          parse_mode: 'HTML'
         });
       }
 
@@ -227,7 +230,8 @@ async function cardWizard(conversation, ctx) {
       if (cardResult.pdfPath) {
         await ctx.replyWithDocument(new InputFile(cardResult.pdfPath, `${data.name.replace(/\s+/g, '_')}_PrintReady.pdf`), {
           caption: `🖨️ <b>Official Print-Ready Vector PDF Document</b> (Standard 3.5" x 2")`,
-          reply_markup: finishKeyboard
+          reply_markup: finishKeyboard,
+          parse_mode: 'HTML'
         });
       }
 
@@ -283,6 +287,9 @@ async function cardWizard(conversation, ctx) {
       data.colors = editColorQuery.callbackQuery.data.replace('color_', '');
       await editColorQuery.answerCallbackQuery("Palette updated!").catch(() => {});
     }
+  } catch (err) {
+    console.error('[MuluCreatives] Card Wizard Error:', err);
+    await ctx.reply('❌ An error occurred. Please try again with /card or return to /start').catch(() => {});
   }
 }
 
