@@ -30,26 +30,26 @@ bot.use(conversations());
 bot.use(createConversation(cardWizard));
 bot.use(createConversation(logoWizard));
 
-const welcomeMsg = `✨ *Welcome to MuluCreatives!*
+const welcomeMsg = `✨ <b>Welcome to MuluCreatives!</b>
 ━━━━━━━━━━━━━━━━━━━━━━
 Your Commercial Graphics Design Studio inside Telegram 🎨
 Create professional, print-ready designs in seconds!
 
-*🛠️ Available Services:*
+<b>🛠️ Available Services:</b>
 • 🪪 Business Card (7 Designer Templates + Print-Ready PDF)
 • 🎯 Logo Design (6 Presets + Vector Export)
-• 📱 Social Media Design  •  📢 Flyers & Posters
+• 📱 Social Media Design  •  📢 Flyers &amp; Posters
 • 🎬 YouTube Thumbnails  •  🖼️ Banners
 • 📄 CV / Resume  •  🎓 Certificates
 • 💌 Invitations  •  🍔 Restaurant Menus
 • 🏢 Company Profiles  •  🏠 Real Estate Ads
 • 📸 Photo Editing  •  🤖 AI Image Design
 
-_Tap a service below to start:_ 👇`;
+<i>Tap a service below to start:</i> 👇`;
 
 bot.command("start", async (ctx) => {
   db.saveUser({ id: ctx.from.id, firstName: ctx.from.first_name, lastName: ctx.from.last_name, username: ctx.from.username });
-  await ctx.reply(welcomeMsg, { parse_mode: 'Markdown', reply_markup: getMainMenuKeyboard() });
+  await ctx.reply(welcomeMsg, { parse_mode: 'HTML', reply_markup: getMainMenuKeyboard() });
   notifyAdminNewUser(ctx.api, ctx);
 });
 
@@ -57,7 +57,7 @@ bot.command("admin", handleAdminCommand);
 
 bot.command("help", async (ctx) => {
   await ctx.reply(
-    `ℹ️ *MuluCreatives — Commercial Help & Support*
+    `ℹ️ <b>MuluCreatives — Commercial Help &amp; Support</b>
 ━━━━━━━━━━━━━━━━━━━━━━
 /start — Main service menu
 /card — Create a business card (7 styles + PDF)
@@ -67,7 +67,7 @@ bot.command("help", async (ctx) => {
 /help — Show this message
 
 💬 Need custom design work? Contact @MuluCreativesbot`,
-    { parse_mode: 'Markdown' }
+    { parse_mode: 'HTML' }
   );
 });
 
@@ -82,11 +82,11 @@ bot.command("logo", async (ctx) => {
 bot.command("orders", async (ctx) => {
   const userOrders = db.getUserOrders(ctx.from.id);
   if (!userOrders || userOrders.length === 0) {
-    return ctx.reply("📦 *My Orders*\n\nYou haven't placed any design orders yet! Use /card or /logo to get started.", { parse_mode: 'Markdown' });
+    return ctx.reply("📦 <b>My Orders</b>\n\nYou haven't placed any design orders yet! Use /card or /logo to get started.", { parse_mode: 'HTML' });
   }
 
-  const list = userOrders.map((o, idx) => `${idx + 1}. Order \`#${o.id.slice(0, 8)}\` — *${o.status}* (${o.price}) — _${new Date(o.createdAt).toLocaleDateString()}_`).join('\n');
-  await ctx.reply(`📦 *My Recent Orders:*\n━━━━━━━━━━━━━━━━━━━━━━\n${list}`, { parse_mode: 'Markdown' });
+  const list = userOrders.map((o, idx) => `${idx + 1}. Order <code>#${o.id.slice(0, 8)}</code> — <b>${o.status}</b> (${o.price}) — <i>${new Date(o.createdAt).toLocaleDateString()}</i>`).join('\n');
+  await ctx.reply(`📦 <b>My Recent Orders:</b>\n━━━━━━━━━━━━━━━━━━━━━━\n${list}`, { parse_mode: 'HTML' });
 });
 
 bot.callbackQuery("menu_card", async (ctx) => {
@@ -103,36 +103,36 @@ bot.callbackQuery("menu_orders", async (ctx) => {
   await ctx.answerCallbackQuery();
   const userOrders = db.getUserOrders(ctx.from.id);
   if (!userOrders || userOrders.length === 0) {
-    return ctx.reply("📦 *My Orders*\n\nYou haven't placed any design orders yet! Use /card or /logo to get started.", { parse_mode: 'Markdown' });
+    return ctx.reply("📦 <b>My Orders</b>\n\nYou haven't placed any design orders yet! Use /card or /logo to get started.", { parse_mode: 'HTML' });
   }
-  const list = userOrders.map((o, idx) => `${idx + 1}. Order \`#${o.id.slice(0, 8)}\` — *${o.status}* (${o.price}) — _${new Date(o.createdAt).toLocaleDateString()}_`).join('\n');
-  await ctx.reply(`📦 *My Recent Orders:*\n━━━━━━━━━━━━━━━━━━━━━━\n${list}`, { parse_mode: 'Markdown' });
+  const list = userOrders.map((o, idx) => `${idx + 1}. Order <code>#${o.id.slice(0, 8)}</code> — <b>${o.status}</b> (${o.price}) — <i>${new Date(o.createdAt).toLocaleDateString()}</i>`).join('\n');
+  await ctx.reply(`📦 <b>My Recent Orders:</b>\n━━━━━━━━━━━━━━━━━━━━━━\n${list}`, { parse_mode: 'HTML' });
 });
 
 bot.callbackQuery("menu_profile", async (ctx) => {
   await ctx.answerCallbackQuery();
   const userCards = db.getUserCards(ctx.from.id);
   const userOrders = db.getUserOrders(ctx.from.id);
-  const msg = `👤 *My Profile*\n━━━━━━━━━━━━━━━━━━━━━━\nName: ${ctx.from.first_name} ${ctx.from.last_name || ''}\nUsername: @${ctx.from.username || 'N/A'}\nUser ID: \`${ctx.from.id}\` \n\n🪪 Cards Generated: ${userCards.length}\n📦 Total Orders: ${userOrders.length}`;
-  await ctx.reply(msg, { parse_mode: 'Markdown' });
+  const msg = `👤 <b>My Profile</b>\n━━━━━━━━━━━━━━━━━━━━━━\nName: ${ctx.from.first_name} ${ctx.from.last_name || ''}\nUsername: @${ctx.from.username || 'N/A'}\nUser ID: <code>${ctx.from.id}</code> \n\n🪪 Cards Generated: ${userCards.length}\n📦 Total Orders: ${userOrders.length}`;
+  await ctx.reply(msg, { parse_mode: 'HTML' });
 });
 
 bot.callbackQuery("menu_support", async (ctx) => {
   await ctx.answerCallbackQuery();
-  await ctx.reply("💬 *Customer Support*\n━━━━━━━━━━━━━━━━━━━━━━\nFor custom graphics design, special printing requests, or business inquiries, contact our team:\n\n📱 Telegram: @MuluCreativesbot\n📧 Email: support@mulucreatives.com", { parse_mode: 'Markdown' });
+  await ctx.reply("💬 <b>Customer Support</b>\n━━━━━━━━━━━━━━━━━━━━━━\nFor custom graphics design, special printing requests, or business inquiries, contact our team:\n\n📱 Telegram: @MuluCreativesbot\n📧 Email: support@mulucreatives.com", { parse_mode: 'HTML' });
 });
 
 bot.callbackQuery("back_menu", async (ctx) => {
   await ctx.answerCallbackQuery();
-  await ctx.reply(welcomeMsg, { parse_mode: 'Markdown', reply_markup: getMainMenuKeyboard() });
+  await ctx.reply(welcomeMsg, { parse_mode: 'HTML', reply_markup: getMainMenuKeyboard() });
 });
 
 bot.callbackQuery(/menu_.+/, async (ctx) => {
   if (['menu_card', 'menu_logo', 'menu_orders', 'menu_profile', 'menu_support'].includes(ctx.callbackQuery.data)) return;
   await ctx.answerCallbackQuery("🚧 Coming soon!");
   await ctx.reply(
-    `🚧 *Service Coming Soon!*\n\nThis graphics service module is currently under development for Ethiopian customers.\nStay tuned for updates! ✨`,
-    { parse_mode: 'Markdown' }
+    `🚧 <b>Service Coming Soon!</b>\n\nThis graphics service module is currently under development for Ethiopian customers.\nStay tuned for updates! ✨`,
+    { parse_mode: 'HTML' }
   );
 });
 
@@ -141,8 +141,8 @@ bot.callbackQuery("admin_refresh", handleAdminCommand);
 bot.callbackQuery("admin_orders", async (ctx) => {
   await ctx.answerCallbackQuery();
   const orders = db.getAllOrders();
-  const msg = `📦 *All System Orders (${orders.length}):*\n━━━━━━━━━━━━━━━━━━━━━━\n${orders.slice(-10).map(o => `• Order \`#${o.id.slice(0, 8)}\` | User: \`${o.userId}\` | Status: *${o.status}*`).join('\n') || '_No orders_'}`;
-  await ctx.reply(msg, { parse_mode: 'Markdown' });
+  const msg = `📦 <b>All System Orders (${orders.length}):</b>\n━━━━━━━━━━━━━━━━━━━━━━\n${orders.slice(-10).map(o => `• Order <code>#${o.id.slice(0, 8)}</code> | User: <code>${o.userId}</code> | Status: <b>${o.status}</b>`).join('\n') || '<i>No orders</i>'}`;
+  await ctx.reply(msg, { parse_mode: 'HTML' });
 });
 
 bot.callbackQuery("ignore", async (ctx) => {
