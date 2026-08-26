@@ -13,15 +13,15 @@ const templates = {
   modernCorporate: require('../templates/businessCard/modernCorporate'),
   editorial: require('../templates/businessCard/editorial'),
   technology: require('../templates/businessCard/technology'),
-  creative: require('../templates/businessCard/creative'),
+  creative: require('../templates/businessCard/modern'),          // Curved folder tab ribbon split layout (Reference 2)
   ethiopianModern: require('../templates/businessCard/ethiopianModern'),
-  darkPremium: require('../templates/businessCard/darkPremium'),
+  darkPremium: require('../templates/businessCard/corporate'),      // Interlocking squares corporate gold menu layout (Reference 3)
   elegantSerif: require('../templates/businessCard/elegantSerif'),
   executiveMonogram: require('../templates/businessCard/executiveMonogram'),
   // Fallback aliases for legacy template keys
-  modern: require('../templates/businessCard/swissMinimal'),
+  modern: require('../templates/businessCard/modern'),
   luxury: require('../templates/businessCard/darkLuxury'),
-  corporate: require('../templates/businessCard/modernCorporate'),
+  corporate: require('../templates/businessCard/corporate'),
   minimal: require('../templates/businessCard/swissMinimal'),
   elegant: require('../templates/businessCard/elegantSerif')
 };
