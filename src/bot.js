@@ -23,7 +23,14 @@ http.createServer((req, res) => {
   console.log(`🌐 Health check server listening on port ${port}`);
 });
 
-const bot = new Bot(process.env.BOT_TOKEN);
+const rawToken = process.env.BOT_TOKEN || '';
+const token = rawToken.trim().replace(/^["']|["']$/g, '');
+if (!token) {
+  console.error("❌ ERROR: BOT_TOKEN is missing or empty!");
+  process.exit(1);
+}
+
+const bot = new Bot(token);
 
 bot.use(getSessionConfig());
 bot.use(conversations());
