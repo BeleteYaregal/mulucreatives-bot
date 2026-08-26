@@ -12,7 +12,7 @@ module.exports = {
     const height = canvas.height;
     
     // Fallback fonts
-    const fontSans = FONTS?.sans || '"Liberation Sans", "DejaVu Sans", sans-serif';
+    const fontSans = FONTS?.sans || 'Arial, "Liberation Sans", "DejaVu Sans", sans-serif';
     
     const themeBg = colors.bg || '#0F2027'; // Deep dark teal/slate background
     const themeAccent = colors.secondary || '#D4AF37'; // Gold accent
@@ -61,18 +61,18 @@ module.exports = {
         drawSquaresLogo(ctx, centerX, centerY - 90, 100, '#FFFFFF');
       }
 
-      // Company Name
+      // Company Name (Standard premium font size)
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold 32px ${fontSans}`;
+      ctx.font = `bold 42px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText((company || 'Larana, Inc.').toUpperCase(), centerX, centerY + 30);
 
-      // Tagline
+      // Tagline (Standard premium font size)
       if (tagline || data.tagline) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-        ctx.font = `16px ${fontSans}`;
-        ctx.fillText((tagline || data.tagline || 'SLOGAN HERE').toUpperCase(), centerX, centerY + 78);
+        ctx.font = `20px ${fontSans}`;
+        ctx.fillText((tagline || data.tagline || 'SLOGAN HERE').toUpperCase(), centerX, centerY + 85);
       }
 
       // Stylized horizontal lines on left/right of center
@@ -87,14 +87,14 @@ module.exports = {
       ctx.lineTo(width - 100, centerY + 45);
       ctx.stroke();
 
-      // Bottom gold panel strip with core business verticals/services (Reference 3)
+      // Bottom gold panel strip with core business verticals/services (Reference 3 - Standard font size)
       const serviceBarH = 65;
       const serviceBarY = height - 140;
       ctx.fillStyle = themeAccent;
       ctx.fillRect(0, serviceBarY, width, serviceBarH);
 
       ctx.fillStyle = themeBg;
-      ctx.font = `bold 15px ${fontSans}`;
+      ctx.font = `bold 20px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
@@ -104,7 +104,7 @@ module.exports = {
 
       // Website URL at the very bottom
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = `17px ${fontSans}`;
+      ctx.font = `22px ${fontSans}`;
       ctx.fillText(website || 'www.yourwebsite.com', width / 2, height - 40);
 
     } else {
@@ -123,26 +123,26 @@ module.exports = {
 
       const startX = 60;
 
-      // Name & Title inside the left dark panel
+      // Name & Title inside the left dark panel (Standard premium font sizes)
       ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      const nameSize = fitText(ctx, name || 'YOUR NAME', 400, 38, fontSans);
+      const nameSize = fitText(ctx, name || 'YOUR NAME', 400, 54, fontSans);
       ctx.font = `bold ${nameSize}px ${fontSans}`;
       ctx.fillText(name || 'YOUR NAME', startX, 120);
 
       ctx.fillStyle = themeAccent;
-      ctx.font = `18px ${fontSans}`;
-      ctx.fillText(title || 'SLOGAN HERE', startX, 175);
+      ctx.font = `22px ${fontSans}`;
+      ctx.fillText(title || 'SLOGAN HERE', startX, 185);
 
       // Divider line in left panel
       ctx.fillStyle = themeAccent;
       ctx.fillRect(startX, 210, 160, 2);
 
-      // Contacts list inside the left dark panel with gold icons
-      let contactY = 280;
+      // Contacts list inside the left dark panel with gold icons (Legible standard font size)
+      let contactY = 260;
       const stepY = 110;
-      const iconSize = 22;
+      const iconSize = 26;
 
       const drawContactField = (iconDrawFn, value) => {
         if (!value) return;
@@ -150,25 +150,25 @@ module.exports = {
         // Draw circular gold icon badge
         ctx.fillStyle = themeAccent;
         ctx.beginPath();
-        ctx.arc(startX + 22, contactY + 22, 22, 0, Math.PI * 2);
+        ctx.arc(startX + 24, contactY + 24, 24, 0, Math.PI * 2);
         ctx.fill();
 
-        // Draw dark icon inside badge
-        iconDrawFn(ctx, startX + 22, contactY + 22, iconSize * 0.55, themeBg);
+        // Draw dark icon inside badge (centered)
+        iconDrawFn(ctx, startX + 24, contactY + 24, iconSize * 0.55, themeBg);
 
         // Draw value text in white
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = `17px ${fontSans}`;
+        ctx.font = `24px ${fontSans}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(value, startX + 60, contactY + 22);
+        ctx.fillText(value, startX + 65, contactY + 24);
 
         // Thin divider line underneath
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(startX, contactY + 60);
-        ctx.lineTo(startX + 400, contactY + 60);
+        ctx.moveTo(startX, contactY + 68);
+        ctx.lineTo(startX + 400, contactY + 68);
         ctx.stroke();
 
         contactY += stepY;
@@ -181,12 +181,12 @@ module.exports = {
       // Right Side Content (White background)
       const rightCenterX = 520 + (width - 520) / 2;
 
-      // Top-Right: QR Code with thin border frame
-      const qrSize = 180;
+      // Top-Right: QR Code with thin border frame (Aligned & centered)
+      const qrSize = 200;
       drawQRCode(ctx, website || telegram || 'https://t.me/MuluCreativesbot', rightCenterX - qrSize / 2, 100, qrSize, themeBg, '#FFFFFF');
 
       // Repeating Logo & Mini Branding on the right side
-      const miniLogoY = 440;
+      const miniLogoY = 420;
       if (logoBuffer) {
         try {
           const logo = await loadImageFromBuffer(logoBuffer);
@@ -199,12 +199,12 @@ module.exports = {
       }
 
       ctx.fillStyle = themeBg;
-      ctx.font = `bold 22px ${fontSans}`;
+      ctx.font = `bold 28px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.fillText((company || 'Larana, Inc.').toUpperCase(), rightCenterX, miniLogoY + 65);
       
       ctx.fillStyle = textMuted;
-      ctx.font = `13px ${fontSans}`;
+      ctx.font = `16px ${fontSans}`;
       ctx.fillText((tagline || 'SLOGAN HERE').toUpperCase(), rightCenterX, miniLogoY + 90);
 
       // Bottom colored strip across full card width
@@ -214,7 +214,7 @@ module.exports = {
 
       // Centered URL in white inside bottom strip
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `17px ${fontSans}`;
+      ctx.font = `22px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`•   ${website || 'www.yourwebsite.com'}   •`, width / 2, height - footerH / 2);

@@ -12,7 +12,7 @@ module.exports = {
     const height = canvas.height;
     
     // Fallback fonts
-    const fontSans = FONTS?.sans || '"Liberation Sans", "DejaVu Sans", sans-serif';
+    const fontSans = FONTS?.sans || 'Arial, "Liberation Sans", "DejaVu Sans", sans-serif';
     
     const themeBg = colors.bg || '#0A192F'; // Dark Navy/Slate
     const themeAccent = colors.secondary || '#64FFDA'; // Teal/cyan glow accent
@@ -115,18 +115,18 @@ module.exports = {
         drawDefaultLogo(ctx, centerX, centerY - 90, 100, '#FFFFFF');
       }
 
-      // Company Name
+      // Company Name (Standard premium font size)
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold 32px ${fontSans}`;
+      ctx.font = `bold 40px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText((company || 'COMPANY NAME').toUpperCase(), centerX, centerY + 30);
 
-      // Tagline
+      // Tagline (Standard premium font size)
       if (tagline || data.tagline) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-        ctx.font = `16px ${fontSans}`;
-        ctx.fillText((tagline || data.tagline || 'SLOGAN HERE').toUpperCase(), centerX, centerY + 78);
+        ctx.font = `20px ${fontSans}`;
+        ctx.fillText((tagline || data.tagline || 'SLOGAN HERE').toUpperCase(), centerX, centerY + 85);
       }
 
       // Stylized horizontal lines on left/right of center (like Reference 1)
@@ -145,7 +145,7 @@ module.exports = {
 
       // Website URL at bottom
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = `18px ${fontSans}`;
+      ctx.font = `22px ${fontSans}`;
       ctx.fillText(website || 'www.yourwebsite.com', centerX, height - 80);
 
     } else {
@@ -159,26 +159,26 @@ module.exports = {
 
       const startX = 90;
 
-      // Header: Name & Title
+      // Header: Name & Title (Standard premium font sizes)
       ctx.fillStyle = themeBg;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      const nameSize = fitText(ctx, name || 'YOUR NAME', 500, 38, fontSans);
+      const nameSize = fitText(ctx, name || 'YOUR NAME', 500, 64, fontSans);
       ctx.font = `bold ${nameSize}px ${fontSans}`;
-      ctx.fillText(name || 'YOUR NAME', startX, 150);
+      ctx.fillText(name || 'YOUR NAME', startX, 140);
 
       ctx.fillStyle = textMuted;
-      ctx.font = `18px ${fontSans}`;
-      ctx.fillText(title || 'SLOGAN HERE', startX, 212);
+      ctx.font = `24px ${fontSans}`;
+      ctx.fillText(title || 'SLOGAN HERE', startX, 215);
 
       // Horizontal Colored Accent Line beneath Header
       ctx.fillStyle = themeBg;
-      ctx.fillRect(startX, 250, 420, 3);
+      ctx.fillRect(startX, 255, 420, 3);
 
-      // Contacts list with colored icons inside square badges (like Reference 1)
-      let contactY = 320;
-      const stepY = 70;
-      const iconSize = 22;
+      // Contacts list with colored icons inside square badges (like Reference 1 - standard size)
+      let contactY = 300;
+      const stepY = 110;
+      const iconSize = 26;
 
       const drawContactField = (iconDrawFn, label, value) => {
         if (!value) return;
@@ -186,24 +186,24 @@ module.exports = {
         // Draw square icon badge
         ctx.fillStyle = themeBg;
         ctx.beginPath();
-        ctx.roundRect(startX, contactY - 8, 40, 40, 8);
+        ctx.roundRect(startX, contactY, 48, 48, 10);
         ctx.fill();
 
-        // Draw white icon inside badge
-        iconDrawFn(ctx, startX + 20, contactY + 12, iconSize * 0.55, '#FFFFFF');
+        // Draw white icon inside badge (centered)
+        iconDrawFn(ctx, startX + 24, contactY + 24, iconSize * 0.55, '#FFFFFF');
 
         ctx.fillStyle = textDark;
-        ctx.font = `17px ${fontSans}`;
+        ctx.font = `24px ${fontSans}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(value, startX + 55, contactY + 12);
+        ctx.fillText(value, startX + 65, contactY + 24);
 
         // Thin divider line underneath
         ctx.strokeStyle = '#E2E8F0';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(startX, contactY + 36);
-        ctx.lineTo(startX + 480, contactY + 36);
+        ctx.moveTo(startX, contactY + 68);
+        ctx.lineTo(startX + 480, contactY + 68);
         ctx.stroke();
 
         contactY += stepY;
@@ -213,33 +213,33 @@ module.exports = {
       drawContactField(drawEmailIcon, 'Email', email);
       drawContactField(drawLocationIcon, 'Office', location);
 
-      // Top-Right: QR Code with thin border frame
-      const qrSize = 190;
+      // Top-Right: QR Code with thin border frame (Legible & centered)
+      const qrSize = 220;
       const qrX = width - 90 - qrSize;
       const qrY = 120;
       drawQRCode(ctx, website || telegram || 'https://t.me/MuluCreativesbot', qrX, qrY, qrSize, themeBg, '#FFFFFF');
 
       // Bottom-Right: Repeating Logo & Mini Branding
       const miniLogoX = width - 90 - qrSize / 2;
-      const miniLogoY = 480;
+      const miniLogoY = 460;
       if (logoBuffer) {
         try {
           const logo = await loadImageFromBuffer(logoBuffer);
-          ctx.drawImage(logo, miniLogoX - 40, miniLogoY - 40, 80, 80);
+          ctx.drawImage(logo, miniLogoX - 45, miniLogoY - 45, 90, 90);
         } catch (e) {
-          drawDefaultLogo(ctx, miniLogoX, miniLogoY, 70, themeBg);
+          drawDefaultLogo(ctx, miniLogoX, miniLogoY, 80, themeBg);
         }
       } else {
-        drawDefaultLogo(ctx, miniLogoX, miniLogoY, 70, themeBg);
+        drawDefaultLogo(ctx, miniLogoX, miniLogoY, 80, themeBg);
       }
 
       ctx.fillStyle = themeBg;
-      ctx.font = `bold 22px ${fontSans}`;
+      ctx.font = `bold 28px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.fillText((company || 'COMPANY NAME').toUpperCase(), miniLogoX, miniLogoY + 55);
       
       ctx.fillStyle = textMuted;
-      ctx.font = `13px ${fontSans}`;
+      ctx.font = `16px ${fontSans}`;
       ctx.fillText((tagline || 'SLOGAN HERE').toUpperCase(), miniLogoX, miniLogoY + 80);
 
       // Bottom colored strip across full card width
@@ -249,7 +249,7 @@ module.exports = {
 
       // Centered URL in white inside bottom strip
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `17px ${fontSans}`;
+      ctx.font = `22px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`•   ${website || 'www.yourwebsite.com'}   •`, width / 2, height - footerH / 2);

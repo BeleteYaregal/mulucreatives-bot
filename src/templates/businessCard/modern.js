@@ -12,7 +12,7 @@ module.exports = {
     const height = canvas.height;
     
     // Fallback fonts
-    const fontSans = FONTS?.sans || '"Liberation Sans", "DejaVu Sans", sans-serif';
+    const fontSans = FONTS?.sans || 'Arial, "Liberation Sans", "DejaVu Sans", sans-serif';
     
     const themeBg = colors.bg || '#1B4332'; // Dark green/dark slate
     const themeAccent = colors.secondary || '#52B788'; // Soft green accent
@@ -26,7 +26,7 @@ module.exports = {
       gCtx.save();
       gCtx.fillStyle = color;
       
-      // Draw 6 petals as circles/ellipses
+      // Draw 8 petals as circles
       const petals = 8;
       const radius = size * 0.28;
       for (let i = 0; i < petals; i++) {
@@ -70,7 +70,7 @@ module.exports = {
 
       // Company Name
       ctx.fillStyle = textDark;
-      ctx.font = `bold 32px ${fontSans}`;
+      ctx.font = `bold 40px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText(company || 'Larana, Inc.', centerX, centerY + 30);
@@ -83,7 +83,7 @@ module.exports = {
       // Curved folder tab ribbon in the middle of the bottom panel (like Reference 2)
       ctx.fillStyle = themeAccent;
       const tabW = 400;
-      const tabH = 50;
+      const tabH = 54;
       const tabX = centerX - tabW / 2;
       const tabY = height - bottomPanelH - tabH + 10;
       
@@ -95,16 +95,16 @@ module.exports = {
       ctx.closePath();
       ctx.fill();
 
-      // Website URL inside the tab
+      // Website URL inside the tab (Legible standard font size)
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold 17px ${fontSans}`;
+      ctx.font = `bold 22px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(website || 'www.reallygreatsite.com', centerX, tabY + tabH / 2);
 
     } else {
       // --- Back Details Side ---
-      // Left solid panel (40%)
+      // Left solid panel (40% width)
       ctx.fillStyle = themeBg;
       ctx.fillRect(0, 0, 520, height);
 
@@ -127,44 +127,44 @@ module.exports = {
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(520 + 12, 0, width - (520 + 12), height);
 
-      // Left panel content: Name & Title & Logo
+      // Left panel content: Name & Title & Logo (Legible standard font sizes)
       ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      const nameSize = fitText(ctx, name || 'Avery Davis', 400, 38, fontSans);
+      const nameSize = fitText(ctx, name || 'Avery Davis', 400, 54, fontSans);
       ctx.font = `bold ${nameSize}px ${fontSans}`;
-      ctx.fillText(name || 'Avery Davis', 80, 160);
+      ctx.fillText(name || 'Avery Davis', 80, 150);
 
       ctx.fillStyle = themeAccent;
-      ctx.font = `18px ${fontSans}`;
+      ctx.font = `22px ${fontSans}`;
       ctx.fillText(title || 'Director', 80, 215);
       
       // Divider line in left panel
       ctx.fillStyle = themeAccent;
-      ctx.fillRect(80, 250, 120, 2);
+      ctx.fillRect(80, 250, 160, 2);
 
       // Logo on left panel
-      const lY = 460;
+      const lY = 440;
       if (logoBuffer) {
         try {
           const logo = await loadImageFromBuffer(logoBuffer);
-          ctx.drawImage(logo, 80, lY, 80, 80);
+          ctx.drawImage(logo, 80, lY, 90, 90);
         } catch (e) {
-          drawFlowerLogo(ctx, 120, lY + 40, 80, '#FFFFFF');
+          drawFlowerLogo(ctx, 125, lY + 45, 90, '#FFFFFF');
         }
       } else {
-        drawFlowerLogo(ctx, 120, lY + 40, 80, '#FFFFFF');
+        drawFlowerLogo(ctx, 125, lY + 45, 90, '#FFFFFF');
       }
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold 22px ${fontSans}`;
-      ctx.fillText(company || 'Larana, Inc.', 80, lY + 95);
+      ctx.font = `bold 28px ${fontSans}`;
+      ctx.fillText(company || 'Larana, Inc.', 80, lY + 110);
 
-      // Right Side Content (x=600): Contact details
+      // Right Side Content (x=600): Contact details (Aligned & legibly sized)
       const startX = 600;
       let contactY = 200;
       const stepY = 120;
-      const iconSize = 22;
+      const iconSize = 26;
 
       const drawContactField = (iconDrawFn, value) => {
         if (!value) return;
@@ -172,25 +172,25 @@ module.exports = {
         // Draw icon badge (curved rectangular box background like Reference 2)
         ctx.fillStyle = themeAccent;
         ctx.beginPath();
-        ctx.roundRect(startX, contactY - 10, 44, 44, 10);
+        ctx.roundRect(startX, contactY, 48, 48, 12);
         ctx.fill();
 
-        // Draw white icon inside badge
-        iconDrawFn(ctx, startX + 22, contactY + 12, iconSize * 0.55, '#FFFFFF');
+        // Draw white icon inside badge (centered)
+        iconDrawFn(ctx, startX + 24, contactY + 24, iconSize * 0.55, '#FFFFFF');
 
-        // Draw value text
+        // Draw value text (Standard legible font size)
         ctx.fillStyle = textDark;
-        ctx.font = `17px ${fontSans}`;
+        ctx.font = `24px ${fontSans}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(value, startX + 65, contactY + 12);
+        ctx.fillText(value, startX + 68, contactY + 24);
 
         // Thin divider line underneath
         ctx.strokeStyle = '#E2E8F0';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(startX, contactY + 50);
-        ctx.lineTo(width - 90, contactY + 50);
+        ctx.moveTo(startX, contactY + 68);
+        ctx.lineTo(width - 90, contactY + 68);
         ctx.stroke();
 
         contactY += stepY;
@@ -200,9 +200,9 @@ module.exports = {
       drawContactField(drawEmailIcon, email || website);
       drawContactField(drawLocationIcon, location);
       
-      // Draw QR Code on the right side if there's space (e.g. top right of right side)
-      const qrSize = 130;
-      drawQRCode(ctx, website || 'https://example.com', width - 90 - qrSize, 50, qrSize, themeBg, '#FFFFFF');
+      // Draw QR Code on the right side - Vertically and Horizontally Aligned with the contact block!
+      const qrSize = 200;
+      drawQRCode(ctx, website || 'https://example.com', width - 90 - qrSize, 220, qrSize, themeBg, '#FFFFFF');
     }
     
     ctx.restore();

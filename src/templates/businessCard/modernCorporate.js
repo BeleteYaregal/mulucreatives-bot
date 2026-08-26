@@ -12,8 +12,7 @@ module.exports = {
     const height = canvas.height;
     
     // Fallback fonts
-    const fontSans = FONTS?.sans || '"Liberation Sans", "DejaVu Sans", sans-serif';
-    const fontSerif = FONTS?.serif || '"Liberation Serif", "DejaVu Serif", serif';
+    const fontSans = FONTS?.sans || 'Arial, "Liberation Sans", "DejaVu Sans", sans-serif';
     
     const themeBg = colors.bg || '#008080'; // Primary theme background color (e.g. Teal or Orange)
     const themeAccent = colors.secondary || '#C9A050'; // Secondary gold/accent
@@ -75,18 +74,18 @@ module.exports = {
         drawDefaultLogo(ctx, centerX, centerY - 90, 100, '#FFFFFF');
       }
 
-      // Company Name
+      // Company Name (Standard premium font size)
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold 32px ${fontSans}`;
+      ctx.font = `bold 40px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText((company || 'MuluCreatives').toUpperCase(), centerX, centerY + 30);
 
-      // Tagline
+      // Tagline (Standard premium font size)
       if (tagline || data.tagline) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-        ctx.font = `16px ${fontSans}`;
-        ctx.fillText((tagline || data.tagline || 'SLOGAN HERE').toUpperCase(), centerX, centerY + 78);
+        ctx.font = `20px ${fontSans}`;
+        ctx.fillText((tagline || data.tagline || 'SLOGAN HERE').toUpperCase(), centerX, centerY + 85);
       }
 
       // Stylized horizontal lines on left/right of center (like reference images)
@@ -105,7 +104,7 @@ module.exports = {
 
       // Website URL at bottom
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = `18px ${fontSans}`;
+      ctx.font = `22px ${fontSans}`;
       ctx.fillText(website || 'www.mulucreatives.com', centerX, height - 80);
 
     } else {
@@ -116,26 +115,26 @@ module.exports = {
 
       const startX = 90;
 
-      // Header: Name & Title
+      // Header: Name & Title (Standard premium font sizes)
       ctx.fillStyle = themeBg;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      const nameSize = fitText(ctx, name || 'Mark Smith', 500, 38, fontSans);
+      const nameSize = fitText(ctx, name || 'Mark Smith', 500, 64, fontSans);
       ctx.font = `bold ${nameSize}px ${fontSans}`;
-      ctx.fillText(name || 'Mark Smith', startX, 150);
+      ctx.fillText(name || 'Mark Smith', startX, 140);
 
       ctx.fillStyle = textMuted;
-      ctx.font = `18px ${fontSans}`;
-      ctx.fillText(title || 'Managing Director', startX, 212);
+      ctx.font = `24px ${fontSans}`;
+      ctx.fillText(title || 'Managing Director', startX, 215);
 
       // Horizontal Colored Accent Line beneath Header
       ctx.fillStyle = themeBg;
-      ctx.fillRect(startX, 250, 420, 3);
+      ctx.fillRect(startX, 255, 420, 3);
 
-      // Contacts list with colored icons
-      let contactY = 320;
-      const stepY = 70;
-      const iconSize = 22;
+      // Contacts list with colored icons (standard legible size)
+      let contactY = 300;
+      const stepY = 110;
+      const iconSize = 26;
 
       const drawContactField = (iconDrawFn, label, value) => {
         if (!value) return;
@@ -145,7 +144,7 @@ module.exports = {
         iconDrawFn(ctx, startX + 15, contactY + 12, iconSize * 0.55, themeBg);
 
         ctx.fillStyle = textDark;
-        ctx.font = `17px ${fontSans}`;
+        ctx.font = `24px ${fontSans}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(value, startX + 50, contactY + 12);
@@ -165,33 +164,33 @@ module.exports = {
       drawContactField(drawEmailIcon, 'Email', email);
       drawContactField(drawLocationIcon, 'Office', location);
 
-      // Top-Right: QR Code with thin border frame
-      const qrSize = 190;
+      // Top-Right: QR Code with thin border frame (Aligned & centered)
+      const qrSize = 220;
       const qrX = width - 90 - qrSize;
       const qrY = 120;
       drawQRCode(ctx, website || telegram || 'https://t.me/MuluCreativesbot', qrX, qrY, qrSize, themeBg, '#FFFFFF');
 
       // Bottom-Right: Repeating Logo & Mini Branding
       const miniLogoX = width - 90 - qrSize / 2;
-      const miniLogoY = 480;
+      const miniLogoY = 460;
       if (logoBuffer) {
         try {
           const logo = await loadImageFromBuffer(logoBuffer);
-          ctx.drawImage(logo, miniLogoX - 40, miniLogoY - 40, 80, 80);
+          ctx.drawImage(logo, miniLogoX - 45, miniLogoY - 45, 90, 90);
         } catch (e) {
-          drawDefaultLogo(ctx, miniLogoX, miniLogoY, 70, themeBg);
+          drawDefaultLogo(ctx, miniLogoX, miniLogoY, 80, themeBg);
         }
       } else {
-        drawDefaultLogo(ctx, miniLogoX, miniLogoY, 70, themeBg);
+        drawDefaultLogo(ctx, miniLogoX, miniLogoY, 80, themeBg);
       }
 
       ctx.fillStyle = themeBg;
-      ctx.font = `bold 22px ${fontSans}`;
+      ctx.font = `bold 28px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.fillText((company || 'MuluCreatives').toUpperCase(), miniLogoX, miniLogoY + 55);
       
       ctx.fillStyle = textMuted;
-      ctx.font = `13px ${fontSans}`;
+      ctx.font = `16px ${fontSans}`;
       ctx.fillText((tagline || 'SLOGAN HERE').toUpperCase(), miniLogoX, miniLogoY + 80);
 
       // Bottom colored strip across full card width
@@ -201,7 +200,7 @@ module.exports = {
 
       // Centered URL in white inside bottom strip
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `17px ${fontSans}`;
+      ctx.font = `22px ${fontSans}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`•   ${website || 'www.mulucreatives.com'}   •`, width / 2, height - footerH / 2);
