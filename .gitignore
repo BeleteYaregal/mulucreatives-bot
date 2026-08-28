@@ -1,5 +1,22 @@
 node_modules/
 .env
+
+# Generated output files — never commit these
+storage/generated/
+storage/pdf/
+storage/sessions.json
+storage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Image outputs (local previews)
 *.png
 *.jpg
+*.jpeg
 output/
