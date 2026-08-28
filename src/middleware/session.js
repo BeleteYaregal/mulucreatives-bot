@@ -4,31 +4,43 @@ const { session } = require('grammy');
 
 const sessionFile = path.resolve(__dirname, '../../storage/sessions.json');
 
+// In-memory cache to prevent race conditions on file reads/writes
+let memoryCache = null;
+let saveTimer = null;
+
 function loadSessions() {
+  if (memoryCache !== null) return memoryCache;
   try {
     if (fs.existsSync(sessionFile)) {
-      return JSON.parse(fs.readFileSync(sessionFile, 'utf8'));
+      memoryCache = JSON.parse(fs.readFileSync(sessionFile, 'utf8'));
+      return memoryCache;
     }
   } catch (e) {
-    console.error('[MuluCreatives] Error loading sessions:', e);
+    console.error('[Session] Error loading sessions:', e.message);
   }
-  return {};
+  memoryCache = {};
+  return memoryCache;
 }
 
 function saveSessions(sessions) {
-  try {
-    const dir = path.dirname(sessionFile);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(sessionFile, JSON.stringify(sessions, null, 2), 'utf8');
-  } catch (e) {
-    console.error('[MuluCreatives] Error saving sessions:', e);
-  }
+  memoryCache = sessions;
+  // Debounce writes — batch multiple rapid writes into one
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      const dir = path.dirname(sessionFile);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(sessionFile, JSON.stringify(memoryCache, null, 2), 'utf8');
+    } catch (e) {
+      console.error('[Session] Error saving sessions:', e.message);
+    }
+  }, 200);
 }
 
 const fileStorage = {
   async read(key) {
     const sessions = loadSessions();
-    return sessions[key];
+    return sessions[key] ?? undefined;
   },
   async write(key, value) {
     const sessions = loadSessions();
@@ -49,7 +61,9 @@ function getSessionConfig() {
       lastDesign: null,
       conversationData: {},
     }),
-    storage: fileStorage
+    storage: fileStorage,
+    // Explicit session key: scoped per chat (not per user+chat) for conversations to work correctly
+    getSessionKey: (ctx) => ctx.chat?.id?.toString() ?? undefined,
   });
 }
 

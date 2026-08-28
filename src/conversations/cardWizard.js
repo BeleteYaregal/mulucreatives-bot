@@ -49,7 +49,9 @@ async function cardWizard(conversation, ctx) {
     .text("10 | Executive Monogram", "tpl_executiveMonogram");
 
   await ctx.reply("🎨 <b>Select a Professional Design Family:</b>\n\n<i>Each template family has a unique, agency-grade layout &amp; composition.</i>", { parse_mode: 'HTML', reply_markup: tplKeyboard });
-  const tplQuery = await conversation.waitForCallbackQuery(/^tpl_/);
+  const tplQuery = await conversation.waitForCallbackQuery(/^tpl_/, {
+    otherwise: (ctx) => ctx.reply("⬆️ Please tap one of the design family buttons above to continue.").catch(() => {})
+  });
   data.template = tplQuery.callbackQuery.data.replace('tpl_', '');
   await tplQuery.answerCallbackQuery("Template selected!").catch(() => {});
 
@@ -132,7 +134,9 @@ async function cardWizard(conversation, ctx) {
     .text("🇪🇹 Ethiopian Modern", "color_ethiopian_modern");
 
   await ctx.reply("🎨 <b>Select a Color Palette:</b>", { parse_mode: 'HTML', reply_markup: colorKeyboard });
-  const colorQuery = await conversation.waitForCallbackQuery(/^color_/);
+  const colorQuery = await conversation.waitForCallbackQuery(/^color_/, {
+    otherwise: (ctx) => ctx.reply("⬆️ Please tap one of the color palette buttons above to continue.").catch(() => {})
+  });
   data.colors = colorQuery.callbackQuery.data.replace('color_', '');
   await colorQuery.answerCallbackQuery("Palette selected!").catch(() => {});
 
@@ -172,7 +176,9 @@ async function cardWizard(conversation, ctx) {
       reply_markup: editKeyboard
     });
 
-    const actionQuery = await conversation.waitForCallbackQuery(/^(edit_|confirm_order|back_menu)/);
+    const actionQuery = await conversation.waitForCallbackQuery(/^(edit_|confirm_order|back_menu)/, {
+      otherwise: (ctx) => ctx.reply("⬆️ Please tap one of the buttons below the card preview to continue.").catch(() => {})
+    });
     const action = actionQuery.callbackQuery.data;
     await actionQuery.answerCallbackQuery("Processing request...").catch(() => {});
 
@@ -278,12 +284,16 @@ async function cardWizard(conversation, ctx) {
       if (res.valid) data.telegram = res.formatted;
     } else if (action === 'edit_template') {
       await ctx.reply("🎨 Select a Professional Design Family:", { reply_markup: tplKeyboard });
-      const editTplQuery = await conversation.waitForCallbackQuery(/^tpl_/);
+      const editTplQuery = await conversation.waitForCallbackQuery(/^tpl_/, {
+        otherwise: (ctx) => ctx.reply("⬆️ Please tap one of the template buttons above.").catch(() => {})
+      });
       data.template = editTplQuery.callbackQuery.data.replace('tpl_', '');
       await editTplQuery.answerCallbackQuery("Template updated!").catch(() => {});
     } else if (action === 'edit_color') {
       await ctx.reply("🎨 Select a Color Palette:", { reply_markup: colorKeyboard });
-      const editColorQuery = await conversation.waitForCallbackQuery(/^color_/);
+      const editColorQuery = await conversation.waitForCallbackQuery(/^color_/, {
+        otherwise: (ctx) => ctx.reply("⬆️ Please tap one of the color palette buttons above.").catch(() => {})
+      });
       data.colors = editColorQuery.callbackQuery.data.replace('color_', '');
       await editColorQuery.answerCallbackQuery("Palette updated!").catch(() => {});
     }
