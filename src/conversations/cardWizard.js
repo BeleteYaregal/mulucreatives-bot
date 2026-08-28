@@ -49,11 +49,19 @@ async function cardWizard(conversation, ctx) {
     .text("10 | Executive Monogram", "tpl_executiveMonogram");
 
   await ctx.reply("🎨 <b>Select a Professional Design Family:</b>\n\n<i>Each template family has a unique, agency-grade layout &amp; composition.</i>", { parse_mode: 'HTML', reply_markup: tplKeyboard });
-  const tplQuery = await conversation.waitForCallbackQuery(/^tpl_/, {
-    otherwise: (ctx) => ctx.reply("⬆️ Please tap one of the design family buttons above to continue.").catch(() => {})
-  });
-  data.template = tplQuery.callbackQuery.data.replace('tpl_', '');
-  await tplQuery.answerCallbackQuery("Template selected!").catch(() => {});
+
+  let tplPicked = false;
+  while (!tplPicked) {
+    const tplCtx = await conversation.waitFor('callback_query');
+    const cbData = tplCtx.callbackQuery?.data ?? '';
+    if (cbData.startsWith('tpl_')) {
+      data.template = cbData.replace('tpl_', '');
+      await tplCtx.answerCallbackQuery("✅ Template selected!").catch(() => {});
+      tplPicked = true;
+    } else {
+      await tplCtx.answerCallbackQuery().catch(() => {});
+    }
+  }
 
   // --- Step 2: Form Collection ---
   await ctx.reply("📝 What is your <b>Full Name</b>? (e.g. Abel Tesfaye)", { parse_mode: 'HTML' });
@@ -134,11 +142,22 @@ async function cardWizard(conversation, ctx) {
     .text("🇪🇹 Ethiopian Modern", "color_ethiopian_modern");
 
   await ctx.reply("🎨 <b>Select a Color Palette:</b>", { parse_mode: 'HTML', reply_markup: colorKeyboard });
-  const colorQuery = await conversation.waitForCallbackQuery(/^color_/, {
-    otherwise: (ctx) => ctx.reply("⬆️ Please tap one of the color palette buttons above to continue.").catch(() => {})
-  });
-  data.colors = colorQuery.callbackQuery.data.replace('color_', '');
-  await colorQuery.answerCallbackQuery("Palette selected!").catch(() => {});
+
+  // Use manual waitFor loop instead of waitForCallbackQuery to avoid Grammy
+  // collation-key conflicts that silently drop callbacks on Render deployments.
+  let colorPicked = false;
+  while (!colorPicked) {
+    const colorCtx = await conversation.waitFor('callback_query');
+    const cbData = colorCtx.callbackQuery?.data ?? '';
+    if (cbData.startsWith('color_')) {
+      data.colors = cbData.replace('color_', '');
+      await colorCtx.answerCallbackQuery("✅ Palette selected!").catch(() => {});
+      colorPicked = true;
+    } else {
+      // Not a color button — ack silently and keep waiting
+      await colorCtx.answerCallbackQuery().catch(() => {});
+    }
+  }
 
   // --- Step 3: Interactive Live Preview Loop ---
   let isEditing = true;
@@ -176,11 +195,19 @@ async function cardWizard(conversation, ctx) {
       reply_markup: editKeyboard
     });
 
-    const actionQuery = await conversation.waitForCallbackQuery(/^(edit_|confirm_order|back_menu)/, {
-      otherwise: (ctx) => ctx.reply("⬆️ Please tap one of the buttons below the card preview to continue.").catch(() => {})
-    });
-    const action = actionQuery.callbackQuery.data;
-    await actionQuery.answerCallbackQuery("Processing request...").catch(() => {});
+    // Reliable callback loop — waitForCallbackQuery regex matching can silently
+    // drop callbacks on Render. Manual waitFor with prefix check is always safe.
+    let action = null;
+    while (!action) {
+      const actionCtx = await conversation.waitFor('callback_query');
+      const cbData = actionCtx.callbackQuery?.data ?? '';
+      if (cbData.startsWith('edit_') || cbData === 'confirm_order' || cbData === 'back_menu') {
+        action = cbData;
+        await actionCtx.answerCallbackQuery("Processing...").catch(() => {});
+      } else {
+        await actionCtx.answerCallbackQuery().catch(() => {});
+      }
+    }
 
     if (action === 'confirm_order') {
       isEditing = false;
@@ -284,18 +311,32 @@ async function cardWizard(conversation, ctx) {
       if (res.valid) data.telegram = res.formatted;
     } else if (action === 'edit_template') {
       await ctx.reply("🎨 Select a Professional Design Family:", { reply_markup: tplKeyboard });
-      const editTplQuery = await conversation.waitForCallbackQuery(/^tpl_/, {
-        otherwise: (ctx) => ctx.reply("⬆️ Please tap one of the template buttons above.").catch(() => {})
-      });
-      data.template = editTplQuery.callbackQuery.data.replace('tpl_', '');
-      await editTplQuery.answerCallbackQuery("Template updated!").catch(() => {});
+      let editTplPicked = false;
+      while (!editTplPicked) {
+        const tplCtx = await conversation.waitFor('callback_query');
+        const cbData = tplCtx.callbackQuery?.data ?? '';
+        if (cbData.startsWith('tpl_')) {
+          data.template = cbData.replace('tpl_', '');
+          await tplCtx.answerCallbackQuery("✅ Template updated!").catch(() => {});
+          editTplPicked = true;
+        } else {
+          await tplCtx.answerCallbackQuery().catch(() => {});
+        }
+      }
     } else if (action === 'edit_color') {
       await ctx.reply("🎨 Select a Color Palette:", { reply_markup: colorKeyboard });
-      const editColorQuery = await conversation.waitForCallbackQuery(/^color_/, {
-        otherwise: (ctx) => ctx.reply("⬆️ Please tap one of the color palette buttons above.").catch(() => {})
-      });
-      data.colors = editColorQuery.callbackQuery.data.replace('color_', '');
-      await editColorQuery.answerCallbackQuery("Palette updated!").catch(() => {});
+      let editColorPicked = false;
+      while (!editColorPicked) {
+        const colorCtx = await conversation.waitFor('callback_query');
+        const cbData = colorCtx.callbackQuery?.data ?? '';
+        if (cbData.startsWith('color_')) {
+          data.colors = cbData.replace('color_', '');
+          await colorCtx.answerCallbackQuery("✅ Palette updated!").catch(() => {});
+          editColorPicked = true;
+        } else {
+          await colorCtx.answerCallbackQuery().catch(() => {});
+        }
+      }
     }
   }
 } catch (err) {

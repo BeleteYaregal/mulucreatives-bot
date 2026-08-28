@@ -143,6 +143,16 @@ bot.callbackQuery("menu_support", async (ctx) => {
 });
 
 bot.callbackQuery("back_menu", async (ctx) => {
+  // If a conversation is active, let it handle back_menu — don't intercept here.
+  // Grammy Conversations v2 routes callbacks to the active conversation first;
+  // this handler only fires when NO conversation is active (i.e. from a stale message).
+  const sessionData = ctx.session?.conversationData;
+  const hasActiveConversation = sessionData && Object.keys(sessionData).length > 0;
+  if (hasActiveConversation) {
+    // Let the conversation handle it — just ack so Telegram doesn't show "loading"
+    await ctx.answerCallbackQuery().catch(() => {});
+    return;
+  }
   await ctx.answerCallbackQuery().catch(() => {});
   await ctx.reply(welcomeMsg, { parse_mode: 'HTML', reply_markup: getMainMenuKeyboard() });
 });
